@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HFRS Score Simulator</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171d2b; --panel2:#1e2637; --line:#2b3549;
+    --txt:#e8edf6; --muted:#93a0b8; --accent:#5b8def;
+    --stressed:#d73027; --coping:#f0a020; --comfortable:#4575B4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--txt);padding:22px}
+  h1{font-size:20px;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;align-items:start}
+  @media(max-width:560px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 14px;font-weight:600}
+
+  .grouphdr{display:flex;flex-direction:column;margin:18px 0 2px;padding:9px 11px;border-radius:9px;
+    background:var(--panel2);border:1px solid var(--line)}
+  .grouphdr:first-child{margin-top:2px}
+  .ght{font-size:12.5px;font-weight:700;color:var(--txt);letter-spacing:.02em}
+  .ghs{font-size:10.5px;color:var(--muted);margin-top:1px}
+  .ind{padding:11px 0;border-bottom:1px solid var(--line)}
+  .ind:last-child{border-bottom:none}
+  .ind .row1{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:7px}
+  .ind .name{font-size:14px;font-weight:600}
+  .ind .abbr{color:var(--muted);font-weight:500;font-size:12px}
+  .ind .wt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .ind .val{font-variant-numeric:tabular-nums;font-size:12px;color:var(--muted)}
+  .ind .contrib{font-variant-numeric:tabular-nums;font-size:11px;padding:1px 7px;border-radius:20px;margin-left:6px}
+  .pos{background:rgba(69,117,180,.18);color:#8ab4f0}
+  .neg{background:rgba(215,48,39,.18);color:#f08a8a}
+  input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:5px;background:var(--panel2);outline:none;margin:4px 0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+       background:var(--accent);cursor:pointer;border:2px solid #0f1420;box-shadow:0 0 0 1px var(--accent)}
+  .ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:1px}
+  .btns{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+  .btnrow{display:flex;gap:9px}
+  .btnrow button{flex:1}
+  button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;
+    padding:8px 13px;font-size:12.5px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+
+  .score-wrap{position:sticky;top:22px;text-align:center}
+  .score-num{font-size:76px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;margin:6px 0 2px}
+  .codes{display:inline-block;font-size:22px;font-weight:700;letter-spacing:.02em;padding:5px 18px;border-radius:22px;
+    margin-bottom:5px;background:var(--panel2);border:1px solid var(--line)}
+  .codes .amp{color:var(--muted);font-weight:500;margin:0 4px}
+  .codes-standsfor{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin:3px 0 5px}
+  .codes-sub{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:16px;line-height:1.45}
+  .gauge{position:relative;height:14px;border-radius:20px;overflow:hidden;margin:6px 0 4px;
+    background:linear-gradient(90deg,#2b3549 0%,var(--accent) 100%)}
+  .needle{position:absolute;top:-6px;width:3px;height:26px;background:#fff;border-radius:2px;box-shadow:0 0 4px rgba(0,0,0,.6);transform:translateX(-50%)}
+  .scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:6px}
+  .rawline{font-size:12px;color:var(--muted);margin-top:14px;font-variant-numeric:tabular-nums}
+  .notes-block{margin-top:22px}
+  .note{color:var(--muted);font-size:12px;line-height:1.6;text-align:left}
+  code{background:var(--panel2);padding:1px 4px;border-radius:4px;font-size:10.5px}
+</style>
+</head>
+<body>
+  <h1>HFRS Score Simulator <span style="font-size:13px;color:var(--muted);font-weight:400">· 2023 · PCA weights</span></h1>
+  <div class="sub">Move each indicator across its real range (dollars, ratios, or categories) to see how the Household Financial Resilience Score (0–100) responds.</div>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>Indicators &nbsp;<span style="text-transform:none;letter-spacing:0;font-weight:400">(weight = PCA-derived, Table 7)</span></h2>
+      <div id="sliders"></div>
+      <div class="btns">
+        <button onclick="setAll('mean')">Reset to 2023 average</button>
+        <div class="btnrow">
+          <button onclick="setAll('lo')">Lowest-HFRS household</button>
+          <button onclick="setAll('hi')">Highest-HFRS household</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card score-wrap">
+      <h2>HFRS Score</h2>
+      <div class="score-num" id="scoreNum">–</div>
+      <div class="codes" id="codes">–</div>
+      <div class="codes-standsfor">stands for</div>
+      <div class="codes-sub" id="codesSub"></div>
+      <div class="gauge"><div class="needle" id="needle"></div></div>
+      <div class="scale"><span>0</span><span>50</span><span>100</span></div>
+      <div class="rawline">Raw weighted sum &nbsp;<b id="rawVal">–</b>&nbsp; <span style="opacity:.7">(2023 range −1.77 … 1.84)</span></div>
+    </div>
+  </div>
+
+  <div class="card notes-block">
+    <h2>Methodology &amp; labels</h2>
+    <div class="note">
+      Exact construction from the paper (2023 sample, n&nbsp;=&nbsp;14,912):
+      <br>① <code>HFRS = Σ wᵢ·zᵢ</code>: weighted sum of the 8 standardized indicators, weights <code>wᵢ</code> from PCA (Table&nbsp;7).
+      <br>② <code>HFRS(0–100) = 100 × (HFRS − min) / (max − min)</code>: min–max rescaled over the 2023 sample.
+      <br>Sliders show each indicator in its <b>original units</b> (dollars, ratios, or category) and walk the 2023 percentile range; internally each value is mapped back to its standardized (z) form via the monotonic empirical transform, so the score stays exact. The percentile beside each value is its rank in the 2023 sample. Contribution chips show each indicator's points on the 0–100 scale.
+      <br><br><b>Label under the score</b> = UMAP type family <b>&amp;</b> clustering segment, each the nearest match to the current slider profile (smallest Euclidean distance in the 8-indicator z-space to the group centroids). Type families (ratio signature): D Debt-driven, DS Debt-driven+Saver, E Multi-earner, F Financial-asset & liquidity-led, B Balanced, T Thin-wealth, W Wealth-anchored. Clusters (wealth level): C1 low-wealth/renters, C2 mid-wealth/mortgaged, C3 high-wealth/outright owners. The two are orthogonal lenses: a ratio signature within a wealth tier.
+    </div>
+  </div>
+
+<script>
+// 2023 min-max of the raw weighted sum (Eq. 16 normalization)
+const RAW_MIN = -1.7738077948, RAW_MAX = 1.8424355074;
+const SCALE = 100/(RAW_MAX-RAW_MIN);            // raw -> 0..100 points
+// PCA weights (Table 7, 2023). Sliders show ORIGINAL units:
+//   cont = raw ratio/$ (slider walks percentiles); cat = categorical value.
+const IND = [
+  // group 1 — levers you can act on (balance-sheet: assets & debts)
+  {zkey:"FINAS_sl_w_z", name:"Asset Liquidity", full:"Financial / Non-financial Assets", abbr:"FINAS", w:0.255, kind:"cont", unit:"ratio", group:"lever"},
+  {zkey:"MDI_sl_w_z", name:"Mortgage Burden", full:"Mortgage Debt / Income", abbr:"MDI", w:-0.19, kind:"cont", unit:"x", group:"lever"},
+  {zkey:"SHUSH_sl_w_z", name:"Registered Savings", full:"Sheltered / Unsheltered Savings", abbr:"SHUSH", w:0.142, kind:"cont", unit:"ratio", group:"lever"},
+  {zkey:"PWNETWPT_sl_w_z", name:"Net Worth", full:"Net Worth", abbr:"PWNETWPT", w:0.118, kind:"cont", unit:"$", group:"lever"},
+  {zkey:"BBDI_sl_w_z", name:"Cash Buffer", full:"Bank Balance / Debt", abbr:"BBDI", w:0.073, kind:"cont", unit:"ratio", group:"lever"},
+  {zkey:"ODDI_sl_w_z", name:"Consumer Debt Burden", full:"Other Debt / Income", abbr:"ODDI", w:0.026, kind:"cont", unit:"x", group:"lever"},
+  // group 2 — structural context (income-side, slow to change)
+  {zkey:"PATTSTIN_z", name:"Income Outlook", full:"Income Stability Expectation", abbr:"PATTSTIN", w:-0.149, kind:"cat", unit:"", group:"structural"},
+  {zkey:"PNBEARG_z", name:"Income Diversification", full:"Number of Earners", abbr:"PNBEARG", w:-0.044, kind:"cat", unit:"", group:"structural"},
+];
+const GROUPS = {
+  lever:{title:"Actionable levers", sub:"balance sheet: assets &amp; debts a household can restructure over time"},
+  structural:{title:"Structural context", sub:"income side, slow to change"},
+};
+// per-indicator lookup: slider percentile -> z (for score) and -> raw (for display)
+const CONT = {
+  BBDI:{pmean:70.71, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-0.6327,-0.6327,-0.6323,-0.627,-0.6196,-0.6117,-0.6028,-0.5927,-0.582,-0.5695,-0.5569,-0.5437,-0.5308,-0.5132,-0.4963,-0.477,-0.4557,-0.4301,-0.4048,-0.3773,-0.3445,-0.3108,-0.2718,-0.2265,-0.1798,-0.1249,-0.0694,0.0061,0.077,0.1742,0.2796,0.3958,0.5296,0.6974,0.8956,1.1286,1.463,1.8808,2.4997,3.6485,4.8281], rawgrid:[0.0,0.0,0.0,0.0,0.01,0.01,0.01,0.02,0.02,0.03,0.03,0.04,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.13,0.15,0.17,0.19,0.21,0.24,0.27,0.31,0.35,0.41,0.47,0.55,0.64,0.76,0.91,1.11,1.43,1.9,2.77,5.13,546.67]},
+  SHUSH:{pmean:56.05, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-1.0951,-1.0951,-1.0951,-1.0951,-1.0951,-1.0648,-0.995,-0.9267,-0.8611,-0.7945,-0.7284,-0.6646,-0.5955,-0.5306,-0.4653,-0.3982,-0.3332,-0.2744,-0.2043,-0.1347,-0.0568,0.0151,0.092,0.1691,0.2459,0.3199,0.4094,0.494,0.5847,0.6745,0.776,0.8782,0.9834,1.1087,1.2397,1.4076,1.581,1.7936,2.0862,2.5514,2.9926], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.05,0.19,0.34,0.5,0.69,0.89,1.11,1.38,1.66,1.98,2.35,2.75,3.16,3.7,4.3,5.07,5.87,6.86,7.98,9.26,10.67,12.63,14.79,17.48,20.6,24.76,29.76,35.93,44.91,56.63,76.14,103.23,149.78,249.61,561.13,290000.0]},
+  MDI:{pmean:65.45, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.3565,-0.0802,0.1223,0.3009,0.4509,0.5895,0.7107,0.8291,0.9691,1.1106,1.2453,1.4185,1.6146,1.9021,2.3985,3.2976], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.25,0.51,0.74,0.97,1.18,1.41,1.62,1.84,2.13,2.45,2.79,3.28,3.9,4.99,7.45,7000.0]},
+  FINAS:{pmean:61.88, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-0.8359,-0.8349,-0.8261,-0.8111,-0.7903,-0.7666,-0.7388,-0.7083,-0.6751,-0.6442,-0.6067,-0.5724,-0.5337,-0.4972,-0.4604,-0.4194,-0.3791,-0.3384,-0.2987,-0.2574,-0.2152,-0.1689,-0.119,-0.0713,-0.0225,0.0283,0.0836,0.1372,0.1962,0.258,0.3295,0.4096,0.4944,0.5819,0.6897,0.8164,1.0035,1.2885,1.7651,2.5922,4.2249], rawgrid:[-31.87,0.0,0.01,0.02,0.04,0.07,0.1,0.13,0.17,0.2,0.24,0.28,0.33,0.38,0.43,0.49,0.54,0.61,0.67,0.73,0.8,0.89,0.98,1.07,1.17,1.28,1.4,1.52,1.67,1.83,2.03,2.27,2.54,2.85,3.27,3.81,4.75,6.54,10.87,25.07,1850.4]},
+  ODDI:{pmean:69.14, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.5904,-0.5577,-0.5154,-0.4646,-0.4045,-0.3411,-0.2679,-0.1916,-0.1137,-0.0225,0.0724,0.1825,0.2976,0.418,0.552,0.7051,0.8911,1.1255,1.4469,1.9522,2.8399,4.6696], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.02,0.04,0.05,0.07,0.1,0.12,0.15,0.18,0.21,0.25,0.3,0.35,0.4,0.46,0.54,0.63,0.76,0.95,1.29,2.05,800.0]},
+  PWNETWPT:{pmean:30.06, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-4.9318,-1.1194,-0.5911,-0.4009,-0.2678,-0.1532,-0.0681,-0.0008,0.0523,0.0996,0.1374,0.1721,0.2018,0.23,0.2562,0.2806,0.3012,0.3227,0.3429,0.3635,0.3815,0.399,0.4161,0.4314,0.447,0.4641,0.4784,0.4952,0.5124,0.5285,0.5437,0.5608,0.5795,0.5986,0.6194,0.6397,0.6648,0.6985,0.7408,0.7783,0.7783], rawgrid:[-2388200.0,829.38,9808.75,23854.87,44435.0,75946.88,113012.5,154810.12,198388.0,247539.38,295268.75,347279.0,399062.0,455263.75,514472.5,576618.75,635000.0,702000.0,771458.75,849400.0,924125.0,1003006.25,1086243.0,1167012.12,1255108.0,1359812.5,1453536.25,1572293.75,1703950.0,1837037.5,1972500.0,2136505.0,2331800.0,2549443.75,2809241.25,3088550.0,3473670.0,4066332.25,4954600.0,6635693.75,37779750.0]},
+};
+const CAT = {
+  PATTSTIN:{cats:[-1,0,1], zmap:{"-1":-1.7901,"0":-0.2707,"1":1.2487}, share:{"-1":16.7,"0":56.4,"1":26.9}, zmean:-0.1164},
+  PNBEARG:{cats:[0,1,2,3], zmap:{"0":-1.3305,"1":-0.277,"2":0.7765,"3":1.83}, share:{"0":25.9,"1":33.3,"2":30.2,"3":10.7}, zmean:-0.0069},
+};
+// real 2023 households at the min / max HFRS score (their exact holdings).
+// pos = slider thumb; z = exact standardized value (feeds score); disp/pct = display.
+const PROFILES = {
+  lo:{ // HFRS 0 — deeply underwater
+    BBDI:{pos:54.36,z:-0.257,disp:"0.17",pct:"54 pct"}, SHUSH:{pos:13.47,z:-1.036,disp:"0.11",pct:"13 pct"},
+    MDI:{pos:100,z:3.2976,disp:"86.34×",pct:"100 pct"}, FINAS:{pos:0.32,z:-0.8359,disp:"−0.01",pct:"0 pct"},
+    ODDI:{pos:91.44,z:1.3058,disp:"0.86×",pct:"91 pct"}, PWNETWPT:{pos:0.29,z:-4.9318,disp:"−$2.39M",pct:"0 pct"},
+    PATTSTIN:{pos:2,z:1.2487,disp:"+1",pct:"26.9% of hh"}, PNBEARG:{pos:2,z:0.7765,disp:"2 earners",pct:"30.2% of hh"}},
+  hi:{ // HFRS 100 — asset-rich
+    BBDI:{pos:2.78,z:-0.6308,disp:"0.00",pct:"3 pct"}, SHUSH:{pos:100,z:2.9926,disp:"4,625",pct:"100 pct"},
+    MDI:{pos:60.21,z:-0.6736,disp:"0.00×",pct:"60 pct"}, FINAS:{pos:100,z:4.2249,disp:"1,850",pct:"100 pct"},
+    ODDI:{pos:70.17,z:-0.0136,disp:"0.22×",pct:"70 pct"}, PWNETWPT:{pos:30.58,z:0.2204,disp:"$435k",pct:"31 pct"},
+    PATTSTIN:{pos:0,z:-1.7901,disp:"−1",pct:"16.7% of hh"}, PNBEARG:{pos:2,z:0.7765,disp:"2 earners",pct:"30.2% of hh"}},
+};
+const override = {};  // abbr -> exact profile entry (set by lo/hi buttons, cleared on drag)
+
+// ---- nearest-centroid classification (8-indicator z-space) ----
+// centroid vectors follow this key order:
+const CENT_KEYS = ["BBDI_sl_w_z","SHUSH_sl_w_z","MDI_sl_w_z","FINAS_sl_w_z","ODDI_sl_w_z","PWNETWPT_sl_w_z","PATTSTIN_z","PNBEARG_z"];
+// Clustering segments (JUN 24 clustering): 0->C1, 1->C2, 2->C3
+const CLUSTERS = {
+  0:{code:"C1", name:"Low-wealth · Do not own",           c:[-0.2292,-0.4902,-0.5043,0.0616,0.0408,-0.7409,0.072,-0.3602]},
+  1:{code:"C2", name:"Mid-wealth · Own with mortgage",    c:[-0.1758,0.3612,0.9637,-0.1702,0.1292,0.3827,0.006,0.53]},
+  2:{code:"C3", name:"High-wealth · Own without mortgage",c:[0.4997,0.1647,-0.669,0.1683,-0.2342,0.4568,-0.2879,-0.2387]},
+};
+// UMAP type FAMILIES (letter prefix of the portrait code): centroid + name
+const TYPES = {
+  D:{name:"Debt-driven",                    c:[-0.2864,0.0156,0.6588,-0.2344,0.2425,-0.5299,0.9846,0.3453]},
+  DS:{name:"Debt-driven + Saver",           c:[-0.1162,0.4496,1.3405,-0.2573,-0.404,0.3631,-0.2707,-1.3305]},
+  E:{name:"Multi-earner",                   c:[-0.2754,0.2739,0.2172,-0.1436,-0.038,0.4429,0.3128,1.8082]},
+  F:{name:"Financial-asset & liquidity-led",c:[0.2322,-0.0549,-0.6521,0.2275,-0.3733,0.1842,0.2603,-1.063]},
+  B:{name:"Balanced",                       c:[0.0801,0.189,0.0735,-0.0125,0.1261,0.33,-0.3273,0.0335]},
+  T:{name:"Thin-wealth",                    c:[-0.1859,-0.1632,-0.6359,-0.0875,-0.1266,0.2048,1.0491,0.7182]},
+  W:{name:"Wealth-anchored",                c:[-0.0215,0.2875,0.0266,-0.0013,-0.1153,0.4015,-1.4925,0.3655]},
+};
+function nearest(coll){
+  const q = CENT_KEYS.map(k=>vals[k]);
+  let bestKey=null, bestD=Infinity;
+  for(const key in coll){
+    const c=coll[key].c; let s=0;
+    for(let i=0;i<c.length;i++){const dv=q[i]-c[i]; s+=dv*dv;}
+    if(s<bestD){bestD=s; bestKey=key;}
+  }
+  return bestKey;
+}
+
+const vals = {};   // zkey -> current z (feeds the score & centroid labels)
+const pos  = {};   // zkey -> slider position (percentile for cont, category index for cat)
+const sliderBox = document.getElementById("sliders");
+
+function lerp(xg,yg,x){
+  if(x<=xg[0]) return yg[0];
+  if(x>=xg[xg.length-1]) return yg[yg.length-1];
+  let i=1; while(x>xg[i]) i++;
+  const t=(x-xg[i-1])/(xg[i]-xg[i-1]);
+  return yg[i-1]+t*(yg[i]-yg[i-1]);
+}
+function fmtRaw(unit, raw){
+  if(unit==="$"){
+    const a=Math.abs(raw), s=raw<0?"−$":"$";
+    if(a>=1e6) return s+(a/1e6).toFixed(a>=1e7?0:2)+"M";
+    if(a>=1e3) return s+Math.round(a/1e3)+"k";
+    return s+Math.round(a);
+  }
+  if(unit==="x") return raw.toFixed(2)+"×";
+  return Math.abs(raw)>=100 ? Math.round(raw).toLocaleString() : raw.toFixed(2);
+}
+function catInit(ind){ // category index nearest to mean z
+  const cc=CAT[ind.abbr]; let bi=0,bd=Infinity;
+  cc.cats.forEach((cat,i)=>{const d=Math.abs(cc.zmap[cat]-cc.zmean); if(d<bd){bd=d;bi=i;}});
+  return bi;
+}
+function catLabel(ind,cat){
+  if(ind.abbr==="PATTSTIN") return cat>0?"+"+cat:(""+cat);
+  return cat + (cat>=3?"+ earners" : cat===1?" earner":" earners");
+}
+// pos -> z (into vals) + display strings
+function derive(ind){
+  const ov=override[ind.abbr];
+  if(ov){ vals[ind.zkey]=ov.z; return {raw:ov.disp, pct:ov.pct}; }
+  if(ind.kind==="cont"){
+    const c=CONT[ind.abbr], p=pos[ind.zkey];
+    vals[ind.zkey]=lerp(c.pgrid,c.zgrid,p);
+    return {raw:fmtRaw(ind.unit,lerp(c.pgrid,c.rawgrid,p)), pct:Math.round(p)+" pct"};
+  }
+  const cc=CAT[ind.abbr], cat=cc.cats[Math.round(pos[ind.zkey])];
+  vals[ind.zkey]=cc.zmap[cat];
+  return {raw:catLabel(ind,cat), pct:cc.share[cat]+"% of hh"};
+}
+
+let _lastGroup=null;
+IND.forEach(ind=>{
+  if(ind.group!==_lastGroup){
+    _lastGroup=ind.group;
+    const h=document.createElement("div"); h.className="grouphdr";
+    h.innerHTML=`<span class="ght">${GROUPS[ind.group].title}</span><span class="ghs">${GROUPS[ind.group].sub}</span>`;
+    sliderBox.appendChild(h);
+  }
+  let attrs, ends;
+  if(ind.kind==="cont"){
+    const c=CONT[ind.abbr]; pos[ind.zkey]=c.pmean;
+    attrs=`min="0" max="100" step="0.1" value="${c.pmean}"`;
+    ends=`<span>Min (${fmtRaw(ind.unit,c.rawgrid[0])})</span><span>Max (${fmtRaw(ind.unit,c.rawgrid[c.rawgrid.length-1])})</span>`;
+  } else {
+    const cc=CAT[ind.abbr]; pos[ind.zkey]=catInit(ind);
+    attrs=`min="0" max="${cc.cats.length-1}" step="1" value="${pos[ind.zkey]}"`;
+    ends=`<span>Min (${catLabel(ind,cc.cats[0])})</span><span>Max (${catLabel(ind,cc.cats[cc.cats.length-1])})</span>`;
+  }
+  const el=document.createElement("div"); el.className="ind";
+  el.innerHTML = `
+    <div class="row1">
+      <div class="name">${ind.name} <span class="abbr">(${ind.abbr})</span><br><span class="wt">${ind.full} · w = ${ind.w>=0?"+":""}${ind.w.toFixed(3)}</span></div>
+      <div><span class="val" id="val_${ind.abbr}"></span><span class="contrib" id="c_${ind.abbr}"></span></div>
+    </div>
+    <input type="range" ${attrs} id="s_${ind.abbr}">
+    <div class="ends">${ends}</div>`;
+  sliderBox.appendChild(el);
+  el.querySelector("input").addEventListener("input", e=>{ delete override[ind.abbr]; pos[ind.zkey]=parseFloat(e.target.value); update(); });
+});
+
+function update(){
+  let raw = 0;
+  IND.forEach(ind=>{
+    const disp = derive(ind);                 // sets vals[zkey]
+    const wz = ind.w * vals[ind.zkey]; raw += wz;
+    document.getElementById("val_"+ind.abbr).textContent = disp.raw + "  ·  " + disp.pct;
+    const c = document.getElementById("c_"+ind.abbr);
+    const pts = wz*SCALE;
+    c.textContent = (pts>=0?"+":"") + pts.toFixed(1);
+    c.className = "contrib " + (pts>=0?"pos":"neg");
+  });
+  let s = 100*(raw-RAW_MIN)/(RAW_MAX-RAW_MIN);
+  s = Math.max(0, Math.min(100, s));
+  document.getElementById("rawVal").textContent = raw.toFixed(3);
+  document.getElementById("scoreNum").textContent = s.toFixed(1);
+  document.getElementById("needle").style.left = s + "%";
+
+  const tKey = nearest(TYPES), cKey = nearest(CLUSTERS), clu = CLUSTERS[cKey];
+  document.getElementById("codes").innerHTML = `${tKey}<span class="amp">&amp;</span>${clu.code}`;
+  const parts = [TYPES[tKey].name].concat(clu.name.split("·").map(s=>s.trim()));
+  document.getElementById("codesSub").innerHTML = parts.join("<br>");
+}
+
+function setAll(which){
+  IND.forEach(ind=>{
+    let p;
+    if(which==="mean"){ delete override[ind.abbr]; p = ind.kind==="cont" ? CONT[ind.abbr].pmean : catInit(ind); }
+    else { override[ind.abbr]=PROFILES[which][ind.abbr]; p = override[ind.abbr].pos; }  // real min/max-HFRS household
+    pos[ind.zkey]=p; document.getElementById("s_"+ind.abbr).value=p;
+  });
+  update();
+}
+update();
+</script>
+</body>
+</html>
