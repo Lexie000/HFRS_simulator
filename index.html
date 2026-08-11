@@ -782,6 +782,10 @@ function validateStep(n){
     warn.textContent = "Please enter your after-tax annual income to continue.";
     warn.style.display = ""; return false;
   }
+  if(n===2 && !(inp.nonfinancial > 0)){
+    warn.textContent = "Please enter a non-financial asset value greater than $0. Most households have at least some non-financial assets, so review this field carefully before continuing.";
+    warn.style.display = ""; return false;
+  }
   if(n===3 && inp.tenure==="own_mortgage" && inp.mortgage<=0){
     warn.textContent = "You selected 'own with a mortgage' but entered $0 mortgage — please check.";
     warn.style.display = ""; return false;
