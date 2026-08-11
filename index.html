@@ -3,129 +3,403 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HFRS Score Simulator</title>
+<title>HFRS Score Simulator v3</title>
 <style>
   :root{
-    --bg:#0f1420; --panel:#171d2b; --panel2:#1e2637; --line:#2b3549;
-    --txt:#e8edf6; --muted:#93a0b8; --accent:#5b8def;
-    --stressed:#d73027; --coping:#f0a020; --comfortable:#4575B4;
+    --bg:#f5f6f8; --panel:#ffffff; --panel2:#f0f1f4; --line:#e4e6ea;
+    --txt:#101317; --muted:#6b7280; --accent:#101317;
+    --stressed:#c62828; --coping:#b45309; --comfortable:#334155; --good:#15803d;
+    --pos:#1d4ed8; --neg:#c62828;
+    --s1:#2563eb; --s2:#059669; --s3:#ea580c; --s4:#7c3aed;
   }
   *{box-sizing:border-box}
+  button,input,select,textarea{font:inherit}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
        background:var(--bg);color:var(--txt);padding:22px}
   h1{font-size:20px;margin:0 0 2px}
   .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
-  .wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;align-items:start}
-  @media(max-width:560px){.wrap{grid-template-columns:1fr}}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 14px;font-weight:600}
+  .sec{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 10px;font-weight:600}
+  .sec:first-child{margin-top:0}
 
-  .grouphdr{display:flex;flex-direction:column;margin:18px 0 2px;padding:9px 11px;border-radius:9px;
-    background:var(--panel2);border:1px solid var(--line)}
-  .grouphdr:first-child{margin-top:2px}
-  .ght{font-size:12.5px;font-weight:700;color:var(--txt);letter-spacing:.02em}
-  .ghs{font-size:10.5px;color:var(--muted);margin-top:1px}
-  .ind{padding:11px 0;border-bottom:1px solid var(--line)}
-  .ind:last-child{border-bottom:none}
-  .ind .row1{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:7px}
-  .ind .name{font-size:14px;font-weight:600}
-  .ind .abbr{color:var(--muted);font-weight:500;font-size:12px}
-  .ind .wt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .ind .val{font-variant-numeric:tabular-nums;font-size:12px;color:var(--muted)}
-  .ind .contrib{font-variant-numeric:tabular-nums;font-size:11px;padding:1px 7px;border-radius:20px;margin-left:6px}
-  .pos{background:rgba(69,117,180,.18);color:#8ab4f0}
-  .neg{background:rgba(215,48,39,.18);color:#f08a8a}
-  input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:5px;background:var(--panel2);outline:none;margin:4px 0}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
-       background:var(--accent);cursor:pointer;border:2px solid #0f1420;box-shadow:0 0 0 1px var(--accent)}
-  .ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:1px}
-  .btns{margin-top:14px;display:flex;flex-direction:column;gap:9px}
-  .btnrow{display:flex;gap:9px}
-  .btnrow button{flex:1}
-  button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;
-    padding:8px 13px;font-size:12.5px;cursor:pointer}
-  button:hover{border-color:var(--accent)}
+  /* ---------- Page 1 ---------- */
+  #page1{max-width:660px;margin:0 auto}
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field{display:flex;flex-direction:column;gap:3px}
+  .field.full{grid-column:1 / -1}
+  .field label{font-size:12px;font-weight:600}
+  .field .help{font-size:10px;color:var(--muted);line-height:1.3}
+  .field input,.field select{background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);
+    padding:9px 10px;font-size:13px;font-variant-numeric:tabular-nums;width:100%}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+  .warn{background:rgba(198,40,40,.08);border:1px solid var(--stressed);color:var(--stressed);padding:10px;border-radius:8px;font-size:12px;margin-top:14px}
+  .cta{margin-top:22px;width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;
+    padding:13px;font-size:15px;font-weight:700;cursor:pointer}
+  .cta:hover{filter:brightness(1.08)}
 
-  .score-wrap{position:sticky;top:22px;text-align:center}
-  .score-num{font-size:76px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;margin:6px 0 2px}
+  /* ---------- Page 2 ---------- */
+  .results{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;align-items:start}
+  @media(max-width:720px){.results{grid-template-columns:1fr}}
+  .back{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;
+    padding:8px 13px;font-size:12.5px;cursor:pointer;margin-bottom:16px}
+  .back:hover{border-color:var(--accent)}
+
+  .score-num{font-size:76px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;margin:2px 0}
   .codes{display:inline-block;font-size:22px;font-weight:700;letter-spacing:.02em;padding:5px 18px;border-radius:22px;
-    margin-bottom:5px;background:var(--panel2);border:1px solid var(--line)}
+    margin:4px 0 6px;background:var(--panel2);border:1px solid var(--line)}
   .codes .amp{color:var(--muted);font-weight:500;margin:0 4px}
-  .codes-standsfor{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin:3px 0 5px}
-  .codes-sub{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:16px;line-height:1.45}
+  .codes-sub{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:14px;line-height:1.4}
+  .typename{font-size:24px;font-weight:700;letter-spacing:.01em;margin:6px 0 2px}
+  .tenure{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.4}
+  .tenure .mismatch{color:var(--coping)}
+  /* glowing locked position track (what-if aware) */
+  .pos-track{position:relative;height:16px;margin:6px 2px 2px}
+  .pos-track::before{content:"";position:absolute;left:0;right:0;top:6px;height:4px;border-radius:4px;background:var(--panel2)}
+  .pos-mid{position:absolute;left:50%;top:1px;bottom:1px;width:1px;background:var(--line);transform:translateX(-50%);z-index:0}
+  .pos-dot{position:absolute;top:2px;width:12px;height:12px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--bg);z-index:2}
+  .pos-dot.base{background:var(--muted)}
+  .pos-dot.adj{background:var(--accent);box-shadow:0 0 0 2px var(--panel),0 0 6px rgba(0,0,0,.35)}
+  .pos-glow{position:absolute;top:5px;height:6px;border-radius:4px;z-index:1;animation:pospulse 1.3s ease-in-out infinite}
+  .pos-glow.up{background:var(--good);box-shadow:0 0 9px 1px var(--good)}
+  .pos-glow.down{background:var(--stressed);box-shadow:0 0 9px 1px var(--stressed)}
+  @keyframes pospulse{0%,100%{opacity:.5}50%{opacity:1}}
+  .lk-ab{color:var(--muted);font-weight:500;font-size:11px}
+  .dir{font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:6px;letter-spacing:.02em;white-space:nowrap}
+  .dir.up{background:rgba(21,128,61,.12);color:var(--good)}
+  .dir.down{background:rgba(198,40,40,.12);color:var(--stressed)}
   .gauge{position:relative;height:14px;border-radius:20px;overflow:hidden;margin:6px 0 4px;
-    background:linear-gradient(90deg,#2b3549 0%,var(--accent) 100%)}
-  .needle{position:absolute;top:-6px;width:3px;height:26px;background:#fff;border-radius:2px;box-shadow:0 0 4px rgba(0,0,0,.6);transform:translateX(-50%)}
+    background:linear-gradient(90deg,var(--line) 0%,var(--accent) 100%)}
+  .needle{position:absolute;top:-6px;width:3px;height:26px;background:var(--accent);border-radius:2px;box-shadow:0 0 0 1.5px #fff;transform:translateX(-50%)}
   .scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:6px}
-  .rawline{font-size:12px;color:var(--muted);margin-top:14px;font-variant-numeric:tabular-nums}
-  .notes-block{margin-top:22px}
-  .note{color:var(--muted);font-size:12px;line-height:1.6;text-align:left}
+  .pctline{font-size:12px;color:var(--muted);margin:12px 0 4px;line-height:1.45}
+
+  /* contribution bar chart */
+  .cbar-row{display:grid;grid-template-columns:64px 1fr 46px;gap:8px;align-items:center;margin:5px 0}
+  .cbar-lab{font-size:11px;color:var(--muted);font-weight:600}
+  .cbar-track{position:relative;height:12px;background:var(--panel2);border-radius:4px}
+  .cbar-mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line)}
+  .cbar-fill{position:absolute;top:0;bottom:0;border-radius:3px}
+  .cbar-val{font-size:11px;font-variant-numeric:tabular-nums;text-align:right}
+
+  /* what-if sliders */
+  .wf-group{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);font-weight:700;
+    margin:16px 0 4px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+  .wf-group:first-child{margin-top:2px}
+  .wf-row{margin:12px 0}
+  .wf-head{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:3px}
+  .wf-head .wf-lab{font-weight:600}
+  .wf-head .wf-val{color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums}
+  .wf-ends{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:1px}
+  .wf-row.disabled{opacity:.4}
+  .banner{margin:6px 0 14px;border-radius:10px;padding:12px 14px;border:1px solid var(--line);background:var(--panel2)}
+  .banner.pop{animation:bpop .22s ease}
+  @keyframes bpop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  .banner.up{border-color:var(--good);background:rgba(76,175,80,.12)}
+  .banner.down{border-color:var(--stressed);background:rgba(215,48,39,.12)}
+  .banner-main{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+  .banner-label{font-size:12px;color:var(--muted);margin-top:2px}
+  .banner-label b{color:var(--txt)}
+  .banner-chg{font-size:12px;margin-top:6px;font-variant-numeric:tabular-nums;line-height:1.5}
+
+  /* locked indicator sliders */
+  .lockhdr{display:flex;align-items:center;gap:6px}
+  .locknote{font-size:10.5px;color:var(--muted);margin:-4px 0 10px}
+  .lk-row{margin:9px 0}
+  .lk-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px}
+  .lk-head .lk-lab{font-weight:600}
+  .lk-head .lk-pct{color:var(--muted);font-variant-numeric:tabular-nums}
+  .lk-cat{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-top:1px solid var(--line)}
+  .lk-cat .lk-lab{font-weight:600}
+  .lk-cat .lk-v{color:var(--muted)}
+
+  /* range slider base */
+  input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:5px;background:var(--panel2);outline:none;margin:5px 0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+       background:var(--accent);cursor:pointer;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--accent)}
+  input[type=range].locked{pointer-events:none}
+  input[type=range].locked::-webkit-slider-thumb{background:var(--muted);box-shadow:0 0 0 1px var(--muted);cursor:default}
+
+  /* merged score-by-indicator table */
+  .rtable{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 12px}
+  .bd-domain{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);font-weight:700;
+    padding:12px 0 5px;border-bottom:1px solid var(--line);margin-bottom:2px}
+  .bd-domain:first-child{padding-top:4px}
+  .bd-row{display:grid;grid-template-columns:1fr auto 56px auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+  .bd-row:last-child{border-bottom:none}
+  .bd-name{font-size:13px;font-weight:600}
+  .bd-ab{color:var(--muted);font-weight:500;font-size:11px}
+  .bd-ctx{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .bd-bar{position:relative;height:10px;background:var(--panel);border-radius:3px}
+  .bd-bar .mid{position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:var(--line)}
+  .bd-bar .fill{position:absolute;top:0;bottom:0;border-radius:2px}
+  .bd-pts{font-size:11.5px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .bd-pts .bd-old{color:var(--muted)}
+  .bd-pts .bd-new{color:var(--txt);font-weight:700}
+  .rrow{display:grid;grid-template-columns:1fr auto 104px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+  .rrow:last-child{border-bottom:none}
+  .rrow.rhdr{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:7px 0}
+  .rrow.rhdr span:nth-child(2),.rrow.rhdr span:nth-child(3){text-align:right}
+  .rdomain,.lk-domain{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);
+    font-weight:700;padding:12px 0 5px;border-bottom:1px solid var(--line);margin:4px 0 4px}
+  .lk-domain{margin-top:8px}
+  .rname{font-size:14px;font-weight:600;line-height:1.25}
+  .rform{font-size:10.5px;color:var(--muted);margin-top:2px;letter-spacing:.04em}
+  .rval{font-size:14px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;text-align:right}
+  .rpct{font-size:10.5px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;margin-top:1px}
+  .rcontrib{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+  .rbar{position:relative;width:54px;height:10px;background:var(--panel);border-radius:3px;flex:none}
+  .rbar .mid{position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:var(--line)}
+  .rbar .fill{position:absolute;top:0;bottom:0;border-radius:2px}
+  .rpts{font-size:11px;font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+
+  .notes-block{margin-top:22px;max-width:1100px}
+  .note{color:var(--muted);font-size:12px;line-height:1.6}
   code{background:var(--panel2);padding:1px 4px;border-radius:4px;font-size:10.5px}
+
+  /* ---------- Page 1 wizard (Wealthsimple-style) ---------- */
+  #page1{max-width:520px;margin:0 auto}
+  .wcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px 30px 24px;
+    box-shadow:0 10px 34px rgba(16,19,23,.06)}
+  .wprogress{height:3px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:26px}
+  .wprogress-fill{height:100%;width:33.33%;background:var(--s1);border-radius:3px;
+    transition:width .45s cubic-bezier(.4,0,.2,1),background .45s ease}
+  .wstep{display:none;opacity:0;transform:translateY(12px);transition:opacity .32s ease,transform .32s ease}
+  .wstep.show{opacity:1;transform:none}
+  .wstep-head{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+  .wstep-icon{font-size:22px}
+  .wstep-title{font-size:19px;font-weight:700;letter-spacing:-.01em}
+  .wstep-num{margin-left:auto;font-size:11.5px;color:var(--muted);font-weight:600}
+  .wstep-1 .wstep-title{color:var(--s1)} .wstep-2 .wstep-title{color:var(--s2)} .wstep-3 .wstep-title{color:var(--s3)}
+  .subhead{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--muted);margin:22px 0 10px}
+  .subhead.debts{color:var(--s3)} .subhead.housing{color:var(--s4)}
+  /* hero income */
+  .herolabel{text-align:center;font-size:12.5px;color:var(--muted);margin-top:6px}
+  .hero{display:flex;justify-content:center;align-items:baseline;gap:2px;margin:6px 0 2px}
+  .hero-cur{font-size:30px;font-weight:700;color:var(--muted)}
+  .hero-input{border:none;background:transparent;font-size:46px;font-weight:700;color:var(--txt);
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums;padding:4px 0;outline:none;text-align:center;
+    min-width:2ch;transition:transform .18s ease}
+  .hero-input:focus{transform:translateY(-3px)}
+  .herohelp{text-align:center;font-size:11px;color:var(--muted);margin-bottom:8px}
+  /* money field with $ prefix */
+  .moneyfield{position:relative}
+  .moneyfield .pfx{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+  .money{padding-left:22px!important;font-variant-numeric:tabular-nums}
+  /* nav */
+  .wnav{display:flex;gap:10px;margin-top:26px}
+  .wback{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:11px;
+    padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer}
+  .wback:hover{background:var(--panel2)}
+  .wnext{flex:1;background:var(--accent);color:#fff;border:none;border-radius:11px;padding:12px;
+    font-size:14px;font-weight:700;cursor:pointer}
+  .wnext:hover{filter:brightness(1.15)}
+
+  /* bigger, single-column wizard fields */
+  #page1 .form{grid-template-columns:1fr;gap:16px}
+  #page1 .field label{font-size:14.5px}
+  #page1 .field input,#page1 .field select{font-size:16px;padding:12px}
+  #page1 .field .help{font-size:11.5px;line-height:1.35}
+  #page1 .money{padding-left:26px!important}
+  #page1 .moneyfield .pfx{left:12px;font-size:15px}
+
+  /* ---------- Score & What-if pages (centered) ---------- */
+  #page2,#page3{max-width:520px;margin:0 auto}
+  #page2 .wcard,#page3 .wcard{padding:24px 30px 26px}
+  .scorehead{text-align:center}
+  .scorehead .sec{margin:0 0 6px}
+  .scorehead .score-num{margin:2px 0}
+  .scorehead .typename{margin-top:4px}
+  .groupline{line-height:1.9;margin:14px 0 18px}
+  .ptag{display:inline-block;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;margin:3px;
+    border:1px solid var(--line);background:var(--panel2);color:var(--txt)}
+  .ptag.good{border-color:rgba(21,128,61,.35);background:rgba(21,128,61,.08);color:var(--good)}
+  .ptag.bad{border-color:rgba(198,40,40,.32);background:rgba(198,40,40,.07);color:var(--stressed)}
+  .wfdelta{font-size:14px;margin:2px 0 12px;font-variant-numeric:tabular-nums}
+  /* resilience-profile diverging bars (domain-coloured, no red) */
+  .pf-score{font-size:15px;color:var(--muted);margin:2px 0 18px}
+  .pf-score b{font-size:22px;color:var(--txt);font-variant-numeric:tabular-nums}
+  .pf-sec{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin:0 0 14px}
+  .pf-row{display:grid;grid-template-columns:130px 1fr 44px;gap:10px;align-items:center;margin:11px 0;position:relative;cursor:default}
+  .pf-tip{display:none;position:absolute;left:0;bottom:100%;margin-bottom:8px;z-index:20;
+    background:var(--txt);color:var(--bg);border-radius:9px;padding:9px 11px;min-width:198px;
+    box-shadow:0 12px 26px rgba(0,0,0,.24)}
+  .pf-row:hover .pf-tip{display:block}
+  .tip-hd{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;opacity:.65;margin-bottom:6px;font-weight:700}
+  .tip-row{display:flex;justify-content:space-between;gap:16px;padding:2.5px 0;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .tip-ab{opacity:.55;font-size:10px;margin-left:2px}
+  .tip-val{font-weight:700}
+  .pf-lab{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+  .pf-dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .pf-track{position:relative;height:16px;background:var(--panel2);border-radius:5px}
+  .pf-mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line)}
+  .pf-fill{position:absolute;top:0;bottom:0;border-radius:4px}
+  .pf-val{font-size:12.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;color:var(--txt)}
+  .pf-detail{padding:2px 0 6px 17px}
+  .pf-detail-inner{display:flex;flex-direction:column;gap:8px}
+  .dt-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:12.5px;line-height:1.35}
+  .dt-name{color:var(--txt);font-weight:500}
+  .dt-ab{color:var(--muted);font-size:11px;margin-left:2px}
+  .dt-val{color:var(--txt);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pf-note{font-size:11px;color:var(--muted);line-height:1.5;margin:12px 0 4px}
 </style>
 </head>
 <body>
-  <h1>HFRS Score Simulator <span style="font-size:13px;color:var(--muted);font-weight:400">· 2023 · PCA weights</span></h1>
-  <div class="sub">Move each indicator across its real range (dollars, ratios, or categories) to see how the Household Financial Resilience Score (0–100) responds.</div>
+  <h1 style="text-align:center">HFRS Score Simulator <span style="font-size:13px;color:var(--muted);font-weight:400">v3 · 2023 · PCA weights</span></h1>
+  <div class="sub" style="text-align:center">Enter your real finances to get your Household Financial Resilience Score (0–100), then try what-if changes.</div>
 
-  <div class="wrap">
-    <div class="card">
-      <h2>Indicators &nbsp;<span style="text-transform:none;letter-spacing:0;font-weight:400">(weight = PCA-derived, Table 7)</span></h2>
-      <div id="sliders"></div>
-      <div class="btns">
-        <button onclick="setAll('mean')">Reset to 2023 average</button>
-        <div class="btnrow">
-          <button onclick="setAll('lo')">Lowest-HFRS household</button>
-          <button onclick="setAll('hi')">Highest-HFRS household</button>
+  <!-- ============ PAGE 1 — MY FINANCES ============ -->
+  <div id="page1">
+    <div class="wcard">
+      <div class="wprogress"><div class="wprogress-fill" id="wprogress-fill"></div></div>
+
+      <!-- Step 1 — Income & household -->
+      <div class="wstep wstep-1 show" id="wstep-1">
+        <div class="wstep-head"><span class="wstep-icon">💰</span><span class="wstep-title">Income &amp; household</span><span class="wstep-num">Step 1 of 3</span></div>
+        <div class="herolabel">What's your after-tax annual household income?</div>
+        <div class="hero"><span class="hero-cur">$</span><input type="text" inputmode="numeric" class="hero-input js-money" id="inp_income" value="80,000"></div>
+        <div class="herohelp">After tax, all household members combined.</div>
+        <div class="form">
+          <div class="field">
+            <label>How do you expect your income to change (next 2 years)?</label>
+            <select id="inp_outlook">
+              <option value="decrease">Decrease</option>
+              <option value="stable" selected>Stable</option>
+              <option value="increase">Increase</option>
+            </select>
+            <span class="help">How you expect income to change.</span>
+          </div>
+          <div class="field">
+            <label>How many earners are in your household?</label>
+            <select id="inp_earners">
+              <option value="0">0</option><option value="1">1</option>
+              <option value="2" selected>2</option><option value="3">3 or more</option>
+            </select>
+            <span class="help">Number of people earning income.</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="card score-wrap">
-      <h2>HFRS Score</h2>
-      <div class="score-num" id="scoreNum">–</div>
-      <div class="codes" id="codes">–</div>
-      <div class="codes-standsfor">stands for</div>
-      <div class="codes-sub" id="codesSub"></div>
-      <div class="gauge"><div class="needle" id="needle"></div></div>
-      <div class="scale"><span>0</span><span>50</span><span>100</span></div>
-      <div class="rawline">Raw weighted sum &nbsp;<b id="rawVal">–</b>&nbsp; <span style="opacity:.7">(2023 range −1.77 … 1.84)</span></div>
+      <!-- Step 2 — Assets -->
+      <div class="wstep wstep-2" id="wstep-2">
+        <div class="wstep-head"><span class="wstep-icon">🏦</span><span class="wstep-title">Assets</span><span class="wstep-num">Step 2 of 3</span></div>
+        <div class="form">
+          <div class="field"><label>How much do you have in the bank?</label>
+            <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_bank" value="10,000"></div>
+            <span class="help">Chequing, savings, term deposits (non-registered).</span></div>
+          <div class="field"><label>How much is in your registered savings (RRSP, TFSA…)?</label>
+            <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_sheltered" value="50,000"></div>
+            <span class="help">RRSP, TFSA, RRIF, employer pensions.</span></div>
+          <div class="field"><label>How much is in other non-registered investments?</label>
+            <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_nonsheltered" value="5,000"></div>
+            <span class="help">Stocks, bonds, funds outside registered accounts (not bank balance).</span></div>
+          <div class="field"><label>How much are your non-financial assets worth?</label>
+            <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_nonfinancial" value="400,000"></div>
+            <span class="help">Home equity (value − mortgage), vehicles, business equity, and any other tangible possessions of value.</span></div>
+        </div>
+      </div>
+
+      <!-- Step 3 — Debts & housing -->
+      <div class="wstep wstep-3" id="wstep-3">
+        <div class="wstep-head"><span class="wstep-icon">💳</span><span class="wstep-title">Debts &amp; housing</span><span class="wstep-num">Step 3 of 3</span></div>
+        <div class="subhead debts">💳 Debts</div>
+        <div class="form">
+          <div class="field"><label>How much do you owe on your mortgage?</label>
+            <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_mortgage" value="300,000"></div>
+            <span class="help">Principal + other real-estate mortgages. 0 if renting.</span></div>
+          <div class="field"><label>How much other debt do you have?</label>
+            <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_otherdebt" value="5,000"></div>
+            <span class="help">Credit cards, LOC, student / vehicle / payday loans.</span></div>
+        </div>
+        <div class="subhead housing">🏠 Housing</div>
+        <div class="form">
+          <div class="field full"><label>Do you rent or own your home?</label>
+            <select id="inp_tenure">
+              <option value="rent">Renter</option>
+              <option value="own_mortgage" selected>Own with a mortgage</option>
+              <option value="own_outright">Own outright (no mortgage)</option>
+            </select>
+            <span class="help">Should match your mortgage entry (mortgage &gt; 0 only if "own with a mortgage").</span></div>
+        </div>
+      </div>
+
+      <div class="warn" id="warn" style="display:none"></div>
+      <div class="wnav">
+        <button class="wback" id="wbtn-back" onclick="prevStep()" style="display:none">← Back</button>
+        <button class="wnext" id="wbtn-next" onclick="nextStep()">Next →</button>
+      </div>
     </div>
   </div>
 
-  <div class="card notes-block">
-    <h2>Methodology &amp; labels</h2>
-    <div class="note">
-      Exact construction from the paper (2023 sample, n&nbsp;=&nbsp;14,912):
-      <br>① <code>HFRS = Σ wᵢ·zᵢ</code>: weighted sum of the 8 standardized indicators, weights <code>wᵢ</code> from PCA (Table&nbsp;7).
-      <br>② <code>HFRS(0–100) = 100 × (HFRS − min) / (max − min)</code>: min–max rescaled over the 2023 sample.
-      <br>Sliders show each indicator in its <b>original units</b> (dollars, ratios, or category) and walk the 2023 percentile range; internally each value is mapped back to its standardized (z) form via the monotonic empirical transform, so the score stays exact. The percentile beside each value is its rank in the 2023 sample. Contribution chips show each indicator's points on the 0–100 scale.
-      <br><br><b>Label under the score</b> = UMAP type family <b>&amp;</b> clustering segment, each the nearest match to the current slider profile (smallest Euclidean distance in the 8-indicator z-space to the group centroids). Type families (ratio signature): D Debt-driven, DS Debt-driven+Saver, E Multi-earner, F Financial-asset & liquidity-led, B Balanced, T Thin-wealth, W Wealth-anchored. Clusters (wealth level): C1 low-wealth/renters, C2 mid-wealth/mortgaged, C3 high-wealth/outright owners. The two are orthogonal lenses: a ratio signature within a wealth tier.
+  <!-- ============ PAGE 2 — SCORE ============ -->
+  <div id="page2" style="display:none">
+    <div class="wcard">
+      <button class="back" onclick="showPage(1)">← Edit finances</button>
+      <div class="scorehead">
+        <div class="sec">Your HFRS score</div>
+        <div class="score-num" id="scoreNum">–</div>
+        <div class="typename" id="typeName">–</div>
+        <div class="tenure" id="tenureLine"></div>
+        <div class="gauge"><div class="needle" id="needle"></div></div>
+        <div class="scale"><span>0</span><span>50</span><span>100</span></div>
+        <div class="pctline" id="pctLine"></div>
+        <div class="groupline" id="groupLine"></div>
+      </div>
+      <button class="cta" onclick="showPage(3)">See your breakdown →</button>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 3 — PROFILE ============ -->
+  <div id="page3" style="display:none">
+    <div class="wcard">
+      <button class="back" onclick="showPage(2)">← Back to score</button>
+      <div style="text-align:center">
+        <div class="sec">Your resilience profile</div>
+        <div class="pf-score">Your HFRS <b id="pfScoreNum">–</b></div>
+      </div>
+      <div id="profileBars"></div>
+      <div class="pf-note">Points each domain adds to (+, right) or takes from (−, left) the ~49 baseline — they sum to your score.</div>
+      <button class="cta" onclick="showPage(4)">Try a what-if change →</button>
+    </div>
+  </div>
+
+  <!-- ============ PAGE 4 — WHAT-IF ============ -->
+  <div id="page4" style="display:none">
+    <div class="wcard">
+      <button class="back" onclick="showPage(3)">← Back</button>
+      <div class="scorehead">
+        <div class="sec">Your HFRS with these changes</div>
+        <div class="score-num" id="wfScore">–</div>
+        <div class="wfdelta" id="wfDelta"></div>
+        <div class="gauge"><div class="needle" id="wfNeedle"></div></div>
+        <div class="scale"><span>0</span><span>50</span><span>100</span></div>
+      </div>
+      <div class="sec" style="margin-top:24px">Try a change</div>
+      <div id="whatifSliders"></div>
+      <div class="note" style="margin-top:20px">Each slider is bounded by your own inputs (paydowns can't exceed what you owe; sheltered increase up to 2× income; income ±50%). The score above updates live and runs through the same PCA pipeline as your baseline.</div>
     </div>
   </div>
 
 <script>
-// 2023 min-max of the raw weighted sum (Eq. 16 normalization)
+/* ============================================================
+   DATA CONSTANTS — copied verbatim from hfrs_simulator.html
+   ============================================================ */
 const RAW_MIN = -1.7738077948, RAW_MAX = 1.8424355074;
-const SCALE = 100/(RAW_MAX-RAW_MIN);            // raw -> 0..100 points
-// PCA weights (Table 7, 2023). Sliders show ORIGINAL units:
-//   cont = raw ratio/$ (slider walks percentiles); cat = categorical value.
+const SCALE = 100/(RAW_MAX-RAW_MIN);
 const IND = [
-  // group 1 — levers you can act on (balance-sheet: assets & debts)
-  {zkey:"FINAS_sl_w_z", name:"Asset Liquidity", full:"Financial / Non-financial Assets", abbr:"FINAS", w:0.255, kind:"cont", unit:"ratio", group:"lever"},
-  {zkey:"MDI_sl_w_z", name:"Mortgage Burden", full:"Mortgage Debt / Income", abbr:"MDI", w:-0.19, kind:"cont", unit:"x", group:"lever"},
-  {zkey:"SHUSH_sl_w_z", name:"Registered Savings", full:"Sheltered / Unsheltered Savings", abbr:"SHUSH", w:0.142, kind:"cont", unit:"ratio", group:"lever"},
-  {zkey:"PWNETWPT_sl_w_z", name:"Net Worth", full:"Net Worth", abbr:"PWNETWPT", w:0.118, kind:"cont", unit:"$", group:"lever"},
-  {zkey:"BBDI_sl_w_z", name:"Cash Buffer", full:"Bank Balance / Debt", abbr:"BBDI", w:0.073, kind:"cont", unit:"ratio", group:"lever"},
-  {zkey:"ODDI_sl_w_z", name:"Consumer Debt Burden", full:"Other Debt / Income", abbr:"ODDI", w:0.026, kind:"cont", unit:"x", group:"lever"},
-  // group 2 — structural context (income-side, slow to change)
-  {zkey:"PATTSTIN_z", name:"Income Outlook", full:"Income Stability Expectation", abbr:"PATTSTIN", w:-0.149, kind:"cat", unit:"", group:"structural"},
-  {zkey:"PNBEARG_z", name:"Income Diversification", full:"Number of Earners", abbr:"PNBEARG", w:-0.044, kind:"cat", unit:"", group:"structural"},
+  // Debt burden
+  {zkey:"MDI_sl_w_z", name:"Mortgage Burden", abbr:"MDI", w:-0.19, kind:"cont", unit:"x", domain:"debt"},
+  {zkey:"ODDI_sl_w_z", name:"Consumer Debt Burden", abbr:"ODDI", w:0.026, kind:"cont", unit:"x", domain:"debt"},
+  // Savings & assets
+  {zkey:"FINAS_sl_w_z", name:"Asset Liquidity", abbr:"FINAS", w:0.255, kind:"cont", unit:"ratio", domain:"savings"},
+  {zkey:"SHUSH_sl_w_z", name:"Registered Savings", abbr:"SHUSH", w:0.142, kind:"cont", unit:"ratio", domain:"savings"},
+  {zkey:"PWNETWPT_sl_w_z", name:"Net Worth", abbr:"PWNETWPT", w:0.118, kind:"cont", unit:"$", domain:"savings"},
+  {zkey:"BBDI_sl_w_z", name:"Cash Buffer", abbr:"BBDI", w:0.073, kind:"cont", unit:"ratio", domain:"savings"},
+  // Income
+  {zkey:"PATTSTIN_z", name:"Income Outlook", abbr:"PATTSTIN", w:-0.149, kind:"cat", unit:"", domain:"income"},
+  {zkey:"PNBEARG_z", name:"Income Diversification", abbr:"PNBEARG", w:-0.044, kind:"cat", unit:"", domain:"income"},
 ];
-const GROUPS = {
-  lever:{title:"Actionable levers", sub:"balance sheet: assets &amp; debts a household can restructure over time"},
-  structural:{title:"Structural context", sub:"income side, slow to change"},
-};
-// per-indicator lookup: slider percentile -> z (for score) and -> raw (for display)
+const DOMAINS = {debt:"Debt burden", savings:"Savings & assets", income:"Income"};
 const CONT = {
   BBDI:{pmean:70.71, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-0.6327,-0.6327,-0.6323,-0.627,-0.6196,-0.6117,-0.6028,-0.5927,-0.582,-0.5695,-0.5569,-0.5437,-0.5308,-0.5132,-0.4963,-0.477,-0.4557,-0.4301,-0.4048,-0.3773,-0.3445,-0.3108,-0.2718,-0.2265,-0.1798,-0.1249,-0.0694,0.0061,0.077,0.1742,0.2796,0.3958,0.5296,0.6974,0.8956,1.1286,1.463,1.8808,2.4997,3.6485,4.8281], rawgrid:[0.0,0.0,0.0,0.0,0.01,0.01,0.01,0.02,0.02,0.03,0.03,0.04,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.13,0.15,0.17,0.19,0.21,0.24,0.27,0.31,0.35,0.41,0.47,0.55,0.64,0.76,0.91,1.11,1.43,1.9,2.77,5.13,546.67]},
   SHUSH:{pmean:56.05, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-1.0951,-1.0951,-1.0951,-1.0951,-1.0951,-1.0648,-0.995,-0.9267,-0.8611,-0.7945,-0.7284,-0.6646,-0.5955,-0.5306,-0.4653,-0.3982,-0.3332,-0.2744,-0.2043,-0.1347,-0.0568,0.0151,0.092,0.1691,0.2459,0.3199,0.4094,0.494,0.5847,0.6745,0.776,0.8782,0.9834,1.1087,1.2397,1.4076,1.581,1.7936,2.0862,2.5514,2.9926], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.05,0.19,0.34,0.5,0.69,0.89,1.11,1.38,1.66,1.98,2.35,2.75,3.16,3.7,4.3,5.07,5.87,6.86,7.98,9.26,10.67,12.63,14.79,17.48,20.6,24.76,29.76,35.93,44.91,56.63,76.14,103.23,149.78,249.61,561.13,290000.0]},
@@ -138,32 +412,12 @@ const CAT = {
   PATTSTIN:{cats:[-1,0,1], zmap:{"-1":-1.7901,"0":-0.2707,"1":1.2487}, share:{"-1":16.7,"0":56.4,"1":26.9}, zmean:-0.1164},
   PNBEARG:{cats:[0,1,2,3], zmap:{"0":-1.3305,"1":-0.277,"2":0.7765,"3":1.83}, share:{"0":25.9,"1":33.3,"2":30.2,"3":10.7}, zmean:-0.0069},
 };
-// real 2023 households at the min / max HFRS score (their exact holdings).
-// pos = slider thumb; z = exact standardized value (feeds score); disp/pct = display.
-const PROFILES = {
-  lo:{ // HFRS 0 — deeply underwater
-    BBDI:{pos:54.36,z:-0.257,disp:"0.17",pct:"54 pct"}, SHUSH:{pos:13.47,z:-1.036,disp:"0.11",pct:"13 pct"},
-    MDI:{pos:100,z:3.2976,disp:"86.34×",pct:"100 pct"}, FINAS:{pos:0.32,z:-0.8359,disp:"−0.01",pct:"0 pct"},
-    ODDI:{pos:91.44,z:1.3058,disp:"0.86×",pct:"91 pct"}, PWNETWPT:{pos:0.29,z:-4.9318,disp:"−$2.39M",pct:"0 pct"},
-    PATTSTIN:{pos:2,z:1.2487,disp:"+1",pct:"26.9% of hh"}, PNBEARG:{pos:2,z:0.7765,disp:"2 earners",pct:"30.2% of hh"}},
-  hi:{ // HFRS 100 — asset-rich
-    BBDI:{pos:2.78,z:-0.6308,disp:"0.00",pct:"3 pct"}, SHUSH:{pos:100,z:2.9926,disp:"4,625",pct:"100 pct"},
-    MDI:{pos:60.21,z:-0.6736,disp:"0.00×",pct:"60 pct"}, FINAS:{pos:100,z:4.2249,disp:"1,850",pct:"100 pct"},
-    ODDI:{pos:70.17,z:-0.0136,disp:"0.22×",pct:"70 pct"}, PWNETWPT:{pos:30.58,z:0.2204,disp:"$435k",pct:"31 pct"},
-    PATTSTIN:{pos:0,z:-1.7901,disp:"−1",pct:"16.7% of hh"}, PNBEARG:{pos:2,z:0.7765,disp:"2 earners",pct:"30.2% of hh"}},
-};
-const override = {};  // abbr -> exact profile entry (set by lo/hi buttons, cleared on drag)
-
-// ---- nearest-centroid classification (8-indicator z-space) ----
-// centroid vectors follow this key order:
 const CENT_KEYS = ["BBDI_sl_w_z","SHUSH_sl_w_z","MDI_sl_w_z","FINAS_sl_w_z","ODDI_sl_w_z","PWNETWPT_sl_w_z","PATTSTIN_z","PNBEARG_z"];
-// Clustering segments (JUN 24 clustering): 0->C1, 1->C2, 2->C3
 const CLUSTERS = {
   0:{code:"C1", name:"Low-wealth · Do not own",           c:[-0.2292,-0.4902,-0.5043,0.0616,0.0408,-0.7409,0.072,-0.3602]},
   1:{code:"C2", name:"Mid-wealth · Own with mortgage",    c:[-0.1758,0.3612,0.9637,-0.1702,0.1292,0.3827,0.006,0.53]},
   2:{code:"C3", name:"High-wealth · Own without mortgage",c:[0.4997,0.1647,-0.669,0.1683,-0.2342,0.4568,-0.2879,-0.2387]},
 };
-// UMAP type FAMILIES (letter prefix of the portrait code): centroid + name
 const TYPES = {
   D:{name:"Debt-driven",                    c:[-0.2864,0.0156,0.6588,-0.2344,0.2425,-0.5299,0.9846,0.3453]},
   DS:{name:"Debt-driven + Saver",           c:[-0.1162,0.4496,1.3405,-0.2573,-0.404,0.3631,-0.2707,-1.3305]},
@@ -173,21 +427,10 @@ const TYPES = {
   T:{name:"Thin-wealth",                    c:[-0.1859,-0.1632,-0.6359,-0.0875,-0.1266,0.2048,1.0491,0.7182]},
   W:{name:"Wealth-anchored",                c:[-0.0215,0.2875,0.0266,-0.0013,-0.1153,0.4015,-1.4925,0.3655]},
 };
-function nearest(coll){
-  const q = CENT_KEYS.map(k=>vals[k]);
-  let bestKey=null, bestD=Infinity;
-  for(const key in coll){
-    const c=coll[key].c; let s=0;
-    for(let i=0;i<c.length;i++){const dv=q[i]-c[i]; s+=dv*dv;}
-    if(s<bestD){bestD=s; bestKey=key;}
-  }
-  return bestKey;
-}
 
-const vals = {};   // zkey -> current z (feeds the score & centroid labels)
-const pos  = {};   // zkey -> slider position (percentile for cont, category index for cat)
-const sliderBox = document.getElementById("sliders");
-
+/* ============================================================
+   HELPERS (verbatim: lerp, fmtRaw) + nearestZ
+   ============================================================ */
 function lerp(xg,yg,x){
   if(x<=xg[0]) return yg[0];
   if(x>=xg[xg.length-1]) return yg[yg.length-1];
@@ -205,92 +448,361 @@ function fmtRaw(unit, raw){
   if(unit==="x") return raw.toFixed(2)+"×";
   return Math.abs(raw)>=100 ? Math.round(raw).toLocaleString() : raw.toFixed(2);
 }
-function catInit(ind){ // category index nearest to mean z
-  const cc=CAT[ind.abbr]; let bi=0,bd=Infinity;
-  cc.cats.forEach((cat,i)=>{const d=Math.abs(cc.zmap[cat]-cc.zmean); if(d<bd){bd=d;bi=i;}});
-  return bi;
-}
-function catLabel(ind,cat){
-  if(ind.abbr==="PATTSTIN") return cat>0?"+"+cat:(""+cat);
-  return cat + (cat>=3?"+ earners" : cat===1?" earner":" earners");
-}
-// pos -> z (into vals) + display strings
-function derive(ind){
-  const ov=override[ind.abbr];
-  if(ov){ vals[ind.zkey]=ov.z; return {raw:ov.disp, pct:ov.pct}; }
-  if(ind.kind==="cont"){
-    const c=CONT[ind.abbr], p=pos[ind.zkey];
-    vals[ind.zkey]=lerp(c.pgrid,c.zgrid,p);
-    return {raw:fmtRaw(ind.unit,lerp(c.pgrid,c.rawgrid,p)), pct:Math.round(p)+" pct"};
+function nearestZ(coll, zmap){
+  const q = CENT_KEYS.map(k=>zmap[k]);
+  let bestKey=null, bestD=Infinity;
+  for(const key in coll){
+    const c=coll[key].c; let s=0;
+    for(let i=0;i<c.length;i++){const dv=q[i]-c[i]; s+=dv*dv;}
+    if(s<bestD){bestD=s; bestKey=key;}
   }
-  const cc=CAT[ind.abbr], cat=cc.cats[Math.round(pos[ind.zkey])];
-  vals[ind.zkey]=cc.zmap[cat];
-  return {raw:catLabel(ind,cat), pct:cc.share[cat]+"% of hh"};
+  return bestKey;
+}
+function clampScore(x){ return Math.max(0, Math.min(100, x)); }
+function fmtMoneySigned(v){ return (v<0?"−":"")+"$"+Math.round(Math.abs(v)).toLocaleString(); }
+
+/* ============================================================
+   COMPUTATION CORE
+   ============================================================ */
+const ZKEY = {}; IND.forEach(i=>ZKEY[i.abbr]=i.zkey);
+const CONT_ABBR = ["BBDI","SHUSH","MDI","FINAS","ODDI","PWNETWPT"];
+const OUTLOOK_MAP = {decrease:-1, stable:0, increase:1};
+const OUTLOOK_LAB = {"-1":"Decrease","0":"Stable","1":"Increase"};
+const SHORTLAB = {FINAS:"FINAS", MDI:"MDI", SHUSH:"SHUSH", PWNETWPT:"Net worth", BBDI:"BBDI", ODDI:"ODDI", PATTSTIN:"Outlook", PNBEARG:"Earners"};
+const BANNERLAB = {FINAS:"Asset liquidity", MDI:"MDI", SHUSH:"Reg. savings", PWNETWPT:"Net worth", BBDI:"Cash buffer", ODDI:"Consumer debt"};
+const DIVFORM = {
+  FINAS:"Financial / Non-financial assets", MDI:"Mortgage / Income", SHUSH:"Sheltered / (Bank + non-shelt.)",
+  PWNETWPT:"Total assets − Total debts", BBDI:"Bank balance / Income", ODDI:"Other debt / Income",
+  PATTSTIN:"Income outlook (category)", PNBEARG:"Number of earners (category)",
+};
+
+function deriveRatios(inp){
+  const {income,bank,sheltered,nonsheltered,nonfinancial,mortgage,otherdebt}=inp;
+  const totalFinancial = bank + sheltered + nonsheltered;
+  const totalDebt      = mortgage + otherdebt;
+  const totalAssets    = totalFinancial + nonfinancial;
+  const netWorth       = totalAssets - totalDebt;
+  const bbdi = income>0 ? bank/income : 0;
+  const nonshelteredTotal = bank + nonsheltered;
+  let shush = nonshelteredTotal>0 ? sheltered/nonshelteredTotal : (sheltered>0 ? Infinity : 0);
+  const mdi = income>0 ? mortgage/income : (mortgage>0 ? 7000 : 0);
+  let finas = nonfinancial>0 ? totalFinancial/nonfinancial : (totalFinancial>0 ? 1850.4 : 0);
+  finas = Math.max(0, finas);
+  const oddi = income>0 ? otherdebt/income : 0;
+  const pwnetwpt = netWorth;
+  return {BBDI:bbdi, SHUSH:shush, MDI:mdi, FINAS:finas, ODDI:oddi, PWNETWPT:pwnetwpt};
+}
+function rawToZ(abbr, v){ const c=CONT[abbr]; return lerp(c.rawgrid, c.zgrid, v); }
+function rawToPct(abbr, v){ const c=CONT[abbr]; return lerp(c.rawgrid, c.pgrid, v); }
+
+function computeHFRS(inp){
+  const r = deriveRatios(inp);
+  const zv = {};
+  CONT_ABBR.forEach(ab=>{ zv[ZKEY[ab]] = rawToZ(ab, r[ab]); });
+  const oc = OUTLOOK_MAP[inp.outlook]; zv["PATTSTIN_z"] = CAT.PATTSTIN.zmap[oc];
+  const ec = Math.min(parseInt(inp.earners), 3); zv["PNBEARG_z"] = CAT.PNBEARG.zmap[ec];
+
+  let raw = 0; const indicators = {};
+  IND.forEach(ind=>{
+    const z = zv[ind.zkey], contrib = ind.w*z*SCALE; raw += ind.w*z;
+    let disp, pct, pctNum=null, rawVal;
+    if(ind.kind==="cont"){
+      rawVal = r[ind.abbr];
+      const g = CONT[ind.abbr].rawgrid;
+      const dv = isFinite(rawVal) ? Math.max(g[0], Math.min(rawVal, g[g.length-1])) : g[g.length-1];
+      disp = fmtRaw(ind.unit, dv);
+      pctNum = rawToPct(ind.abbr, isFinite(rawVal)?rawVal:g[g.length-1]);
+      pct = Math.round(pctNum) + " pct";
+    } else if(ind.abbr==="PATTSTIN"){
+      rawVal = oc; disp = OUTLOOK_LAB[oc]; pct = "—";
+    } else {
+      rawVal = ec; disp = ec + (ec>=3?"+ earners":ec===1?" earner":" earners"); pct = "—";
+    }
+    indicators[ind.abbr] = {raw:rawVal, z, contrib, disp, pct, pctNum};
+  });
+  const hfrs = clampScore(100*(raw-RAW_MIN)/(RAW_MAX-RAW_MIN));
+  return {hfrs, raw, zv, indicators, tKey:nearestZ(TYPES,zv), cKey:nearestZ(CLUSTERS,zv)};
 }
 
-let _lastGroup=null;
-IND.forEach(ind=>{
-  if(ind.group!==_lastGroup){
-    _lastGroup=ind.group;
-    const h=document.createElement("div"); h.className="grouphdr";
-    h.innerHTML=`<span class="ght">${GROUPS[ind.group].title}</span><span class="ghs">${GROUPS[ind.group].sub}</span>`;
-    sliderBox.appendChild(h);
+const HFRS_PCT = [0,1,2,5,9,15,24,35,47,59,69,78,85,90,93,96,97,98,99,99.5,100];
+function hfrsToPct(score){
+  const i = Math.min(Math.floor(score/5), 19);
+  const t = (score - i*5)/5;
+  return HFRS_PCT[i] + t*(HFRS_PCT[i+1]-HFRS_PCT[i]);
+}
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+function readInputs(){
+  const num = id => { const el=document.getElementById(id); return el ? (parseFloat((el.value||"").replace(/[^0-9.\-]/g,"")) || 0) : 0; };
+  return {income:num("inp_income"), bank:num("inp_bank"), sheltered:num("inp_sheltered"),
+    nonsheltered:num("inp_nonsheltered"), nonfinancial:num("inp_nonfinancial"),
+    mortgage:num("inp_mortgage"), otherdebt:num("inp_otherdebt"),
+    outlook:document.getElementById("inp_outlook").value, earners:document.getElementById("inp_earners").value,
+    tenure:document.getElementById("inp_tenure").value};
+}
+const TENURE_LAB = {rent:"Renter", own_mortgage:"Own with a mortgage", own_outright:"Own outright"};
+const FAMDESC = {
+  D:"Resilience held back by debt — a mortgage or other debt that is large relative to income.",
+  DS:"Still servicing a mortgage yet holding the highest savings ratio — typically a retiree drawing down.",
+  E:"Large, often multi-generational households: income is high but absorbed by family costs and mortgage.",
+  F:"Resilience carried by liquid financial assets and mortgage-freedom rather than property equity.",
+  B:"The broad middle: stable outlook, no single dominant weakness, mixed tenure.",
+  T:"Thin wealth — low net worth despite two earners (often renting young couples).",
+  W:"High net worth but a pessimistic income outlook; typically older households.",
+};
+// descriptive characteristic tags from where the household sits (percentile) — no hyphens
+function profileTags(res){
+  const t=[]; const p=ab=>res.indicators[ab].pctNum; const add=(l,tone)=>t.push({l,tone});
+  if(p("MDI")>=70) add("High mortgage","bad");
+  if(p("ODDI")>=70) add("High other debt","bad");
+  if(p("FINAS")>=70) add("High liquidity","good"); else if(p("FINAS")<=30) add("Low liquidity","bad");
+  if(p("BBDI")>=70) add("High cash buffer","good"); else if(p("BBDI")<=30) add("Low cash buffer","bad");
+  if(p("SHUSH")>=70) add("High savings","good"); else if(p("SHUSH")<=30) add("Low savings","bad");
+  if(p("PWNETWPT")>=70) add("High net worth","good"); else if(p("PWNETWPT")<=30) add("Low net worth","bad");
+  const ol=res.indicators.PATTSTIN.raw; if(ol===1) add("Optimistic outlook","good"); else if(ol===-1) add("Pessimistic outlook","bad");
+  const ea=res.indicators.PNBEARG.raw; if(ea>=3) add("Multiple earners","good"); else if(ea===0) add("No earners","bad");
+  return t.length ? t : [{l:"Balanced across the board",tone:"neutral"}];
+}
+// domain-level score decomposition → diverging horizontal bars (Wealthsimple palette,
+// no red). Left of centre = subtracts points, right = adds; +/− shown on the value.
+const PF_COL = {debt:"#8b5cf6", savings:"#3b82f6", income:"#f59e0b"};
+const RATIO_NAME = {MDI:"Mortgage Burden", ODDI:"Other Debt Burden", FINAS:"Asset Liquidity",
+  SHUSH:"Registered Savings", PWNETWPT:"Net Worth", BBDI:"Cash Buffer",
+  PATTSTIN:"Income Outlook", PNBEARG:"Income Diversification"};
+const fmtPts = c => `${c>=0?"+":""}${c.toFixed(1)}`;
+function renderProfile(res){
+  const dom = {debt:0, savings:0, income:0};
+  IND.forEach(ind => dom[ind.domain] += res.indicators[ind.abbr].contrib);
+  const meta = [
+    {key:"debt",    label:"Debt burden",      c:dom.debt},
+    {key:"savings", label:"Savings & assets", c:dom.savings},
+    {key:"income",  label:"Income",           c:dom.income},
+  ];
+  document.getElementById("pfScoreNum").textContent = res.hfrs.toFixed(1);
+  const MAX = Math.max(10, ...meta.map(m=>Math.abs(m.c)));   // largest bar ≈ half width
+  document.getElementById("profileBars").innerHTML = meta.map(m=>{
+    const w = Math.abs(m.c)/MAX*50, pos = m.c>=0, col = PF_COL[m.key];
+    const fill = pos ? `left:50%;width:${w}%;background:${col}`
+                     : `right:50%;width:${w}%;background:${col}`;
+    const members = IND.filter(i=>i.domain===m.key).map(i=>{
+      const c = res.indicators[i.abbr].contrib;
+      return `<div class="dt-row"><span class="dt-name">${RATIO_NAME[i.abbr]} <span class="dt-ab">${i.abbr}</span></span>`+
+        `<span class="dt-val">${fmtPts(c)}</span></div>`;
+    }).join("");
+    return `<div class="pf-item"><div class="pf-row" onclick="this.parentElement.classList.toggle('open')">`+
+      `<span class="pf-lab"><span class="pf-dot" style="background:${col}"></span>${m.label}<span class="pf-caret">›</span></span>`+
+      `<div class="pf-track"><div class="pf-mid"></div><div class="pf-fill" style="${fill}"></div></div>`+
+      `<span class="pf-val">${pos?"+":""}${m.c.toFixed(1)}</span></div>`+
+      `<div class="pf-detail"><div class="pf-detail-inner">${members}</div></div></div>`;
+  }).join("");
+}
+function validateInputs(){
+  const inp = readInputs();
+  const warn = document.getElementById("warn");
+  if(!(inp.income > 0)){
+    warn.textContent = "Please enter an income greater than 0 to compute your score.";
+    warn.style.display = ""; return false;
   }
-  let attrs, ends;
-  if(ind.kind==="cont"){
-    const c=CONT[ind.abbr]; pos[ind.zkey]=c.pmean;
-    attrs=`min="0" max="100" step="0.1" value="${c.pmean}"`;
-    ends=`<span>Min (${fmtRaw(ind.unit,c.rawgrid[0])})</span><span>Max (${fmtRaw(ind.unit,c.rawgrid[c.rawgrid.length-1])})</span>`;
+  if(inp.tenure === "own_mortgage" && inp.mortgage <= 0){
+    warn.textContent = "You selected 'own with mortgage' but entered $0 mortgage balance — please check.";
+    warn.style.display = ""; return false;
+  }
+  warn.style.display = "none"; return true;
+}
+
+/* ============================================================
+   RENDER — SCORE / CONTRIB / RATIOS / LOCKED
+   ============================================================ */
+let baseInputs = null, baseRes = null;
+
+const CBAR_MAX = 15;
+function renderScore(res, inp){
+  document.getElementById("scoreNum").textContent = res.hfrs.toFixed(1);
+  document.getElementById("needle").style.left = res.hfrs + "%";
+  // type family only (no cluster code); tenure comes from the user's own input
+  document.getElementById("typeName").textContent = TYPES[res.tKey].name.replace(/-/g," ");
+  const wantsMortgage = inp.tenure === "own_mortgage";
+  const mismatch = (wantsMortgage && inp.mortgage <= 0) || (!wantsMortgage && inp.mortgage > 0);
+  document.getElementById("tenureLine").innerHTML = TENURE_LAB[inp.tenure] +
+    (mismatch ? ` <span class="mismatch">⚠ doesn't match your mortgage entry</span>` : "");
+  const p = hfrsToPct(res.hfrs);
+  document.getElementById("pctLine").innerHTML =
+    `Higher than <b>~${Math.round(p)}%</b> of 2023 Canadian households.`;
+  document.getElementById("groupLine").innerHTML =
+    profileTags(res).map(x=>`<span class="ptag ${x.tone}">${x.l}</span>`).join("");
+  renderProfile(res);
+}
+// percentile-slider positions: grey dot = current, white dot = what-if, glow = shift; + ↑/↓ HFRS tag
+const cl = p => Math.max(1.5, Math.min(98.5, p));
+function dirBadge(w){
+  return w>=0
+    ? `<span class="dir up" title="A higher value raises your HFRS">↑ HFRS</span>`
+    : `<span class="dir down" title="A higher value lowers your HFRS">↓ HFRS</span>`;
+}
+function renderPositions(bRes, aRes){
+  const sc = c => { const r = Math.abs(c)<0.05?0:c; return (r>=0?"+":"")+r.toFixed(1); };
+  const ptsCol = c => c>=0 ? "var(--pos)" : "var(--neg)";
+  let lastDomain=null;
+  const html = IND.map(ind=>{
+    let dh="";
+    if(ind.domain!==lastDomain){ lastDomain=ind.domain; dh=`<div class="lk-domain">${DOMAINS[ind.domain]}</div>`; }
+    if(ind.kind==="cont"){
+      const b = bRes.indicators[ind.abbr].pctNum, a = aRes.indicators[ind.abbr].pctNum;   // slider = sample percentile
+      const bc = bRes.indicators[ind.abbr].contrib, ac = aRes.indicators[ind.abbr].contrib; // number = score points
+      const changed = Math.abs(a-b) > 0.5;
+      const better = ac > bc;
+      const lo = cl(Math.min(a,b)), hi = cl(Math.max(a,b));
+      const glow = changed ? `<div class="pos-glow ${better?'up':'down'}" style="left:${lo}%;width:${hi-lo}%"></div>` : "";
+      const adjDot = changed ? `<div class="pos-dot adj" style="left:${cl(a)}%"></div>` : "";
+      const ptsTxt = changed
+        ? `<span style="color:var(--muted)">${sc(bc)}</span> → <span style="color:var(--txt);font-weight:700">${sc(ac)}</span> pts`
+        : `<span style="color:${ptsCol(bc)}">${sc(bc)} pts</span>`;
+      return dh + `<div class="lk-row"><div class="lk-head"><span class="lk-lab">${ind.name} <span class="lk-ab">(${ind.abbr})</span>${dirBadge(ind.w)}</span><span class="lk-pct">${ptsTxt}</span></div>`+
+             `<div class="pos-track">${glow}<div class="pos-dot base" style="left:${cl(b)}%"></div>${adjDot}</div></div>`;
+    }
+    const d = bRes.indicators[ind.abbr];
+    return dh + `<div class="lk-cat"><span class="lk-lab">${ind.name}${dirBadge(ind.w)}</span><span class="lk-v">${d.disp} · <span style="color:${ptsCol(d.contrib)}">${sc(d.contrib)} pts</span></span></div>`;
+  }).join("");
+  document.getElementById("lockedSliders").innerHTML = html;
+}
+
+/* ============================================================
+   WHAT-IF (slider based, ranges from the user's own inputs)
+   ============================================================ */
+const WF = [
+  // block 1 — pay down debt
+  {id:"wf_mortgage",  label:"Mortgage paydown",           bound:i=>i.mortgage,  group:"debt"},
+  {id:"wf_otherdebt", label:"Other debt paydown",         bound:i=>i.otherdebt, group:"debt"},
+  // block 2 — increase savings (bound at 2× income so $0-sheltered households aren't disabled)
+  {id:"wf_sheltered", label:"Sheltered savings increase", bound:i=>i.income*2, group:"save"},
+  // block 3 — change income
+  {id:"wf_income",    label:"Income change",              bidir:true,           group:"income"},
+];
+const WF_GROUPS = {debt:"Pay down debt", save:"Increase savings", income:"Change income"};
+function niceStep(range){ return Math.max(500, Math.round(range/200/500)*500) || 500; }
+function buildWhatif(base){
+  const box = document.getElementById("whatifSliders");
+  let lastGroup = null;
+  box.innerHTML = WF.map(w=>{
+    let min, max, val=0, disabled=false, endLo, endHi;
+    if(w.bidir){
+      max = 0.5*base.income; min = -0.5*base.income;
+      endLo = fmtMoneySigned(min); endHi = "+"+fmtRaw("$",max);
+    } else {
+      min = 0; max = w.bound(base); disabled = max<=0;
+      endLo = "$0"; endHi = fmtRaw("$",max);
+    }
+    const step = niceStep(max-min);
+    let header = "";
+    if(w.group!==lastGroup){ lastGroup=w.group; header=`<div class="wf-group">${WF_GROUPS[w.group]}</div>`; }
+    return header + `<div class="wf-row${disabled?' disabled':''}" id="row_${w.id}">
+      <div class="wf-head"><span class="wf-lab">${w.label}</span><span class="wf-val" id="val_${w.id}">$0</span></div>
+      <input type="range" id="${w.id}" min="${min}" max="${max}" step="${step}" value="${val}" ${disabled?'disabled':''}>
+      <div class="wf-ends"><span>${endLo}</span><span>${endHi}</span></div>
+    </div>`;
+  }).join("");
+  WF.forEach(w=>{
+    const el = document.getElementById(w.id);
+    el.addEventListener("input", ()=>{
+      document.getElementById("val_"+w.id).textContent = w.bidir ? fmtMoneySigned(+el.value) : fmtRaw("$",+el.value);
+      computeWhatif();
+    });
+    document.getElementById("val_"+w.id).textContent = w.bidir ? fmtMoneySigned(+el.value) : fmtRaw("$",+el.value);
+  });
+}
+// updates the live score on the What-if page directly (no ratio breakdown)
+function computeWhatif(){
+  const base = baseInputs;
+  const v = id => { const el=document.getElementById(id); return el ? (parseFloat((el.value||"").replace(/[^0-9.\-]/g,"")) || 0) : 0; };
+  const anyAdj = ["wf_mortgage","wf_sheltered","wf_otherdebt","wf_income"].some(id=>v(id)!==0);
+  const adj = Object.assign({}, base, {
+    mortgage:  Math.max(0, base.mortgage  - v("wf_mortgage")),
+    sheltered: base.sheltered + v("wf_sheltered"),
+    otherdebt: Math.max(0, base.otherdebt - v("wf_otherdebt")),
+    income:    Math.max(1, base.income + v("wf_income")),
+    // outlook and earners unchanged — NOT linked to income change
+  });
+  const adjRes = computeHFRS(adj);
+  const delta = adjRes.hfrs - baseRes.hfrs;
+
+  document.getElementById("wfScore").textContent = adjRes.hfrs.toFixed(1);
+  document.getElementById("wfNeedle").style.left = adjRes.hfrs + "%";
+  const dEl = document.getElementById("wfDelta");
+  if(!anyAdj || Math.abs(delta) < 0.05){
+    dEl.innerHTML = `Your baseline is <b>${baseRes.hfrs.toFixed(1)}</b> · move a slider below`;
+    dEl.style.color = "var(--muted)";
   } else {
-    const cc=CAT[ind.abbr]; pos[ind.zkey]=catInit(ind);
-    attrs=`min="0" max="${cc.cats.length-1}" step="1" value="${pos[ind.zkey]}"`;
-    ends=`<span>Min (${catLabel(ind,cc.cats[0])})</span><span>Max (${catLabel(ind,cc.cats[cc.cats.length-1])})</span>`;
+    const col = delta>0 ? "var(--good)" : "var(--stressed)";
+    const tChg = adjRes.tKey!==baseRes.tKey ? ` · now <b>${TYPES[adjRes.tKey].name.replace(/-/g," ")}</b>` : "";
+    dEl.innerHTML = `<b style="color:${col}">${delta>=0?"+":""}${delta.toFixed(1)} pts</b> vs baseline ${baseRes.hfrs.toFixed(1)}${tChg}`;
+    dEl.style.color = "var(--muted)";
   }
-  const el=document.createElement("div"); el.className="ind";
-  el.innerHTML = `
-    <div class="row1">
-      <div class="name">${ind.name} <span class="abbr">(${ind.abbr})</span><br><span class="wt">${ind.full} · w = ${ind.w>=0?"+":""}${ind.w.toFixed(3)}</span></div>
-      <div><span class="val" id="val_${ind.abbr}"></span><span class="contrib" id="c_${ind.abbr}"></span></div>
-    </div>
-    <input type="range" ${attrs} id="s_${ind.abbr}">
-    <div class="ends">${ends}</div>`;
-  sliderBox.appendChild(el);
-  el.querySelector("input").addEventListener("input", e=>{ delete override[ind.abbr]; pos[ind.zkey]=parseFloat(e.target.value); update(); });
+}
+
+/* ============================================================
+   PAGE NAVIGATION
+   ============================================================ */
+function showPage(n){
+  for(let i=1;i<=4;i++) document.getElementById("page"+i).style.display = i===n ? "" : "none";
+  window.scrollTo(0,0);
+}
+function updateFromInputs(){
+  baseInputs = readInputs();
+  baseRes = computeHFRS(baseInputs);
+  renderScore(baseRes, baseInputs);   // score page
+  buildWhatif(baseInputs);            // what-if page sliders
+  computeWhatif();                    // what-if page live score = baseline
+}
+/* ---------- 3-step wizard ---------- */
+let wstep = 1;
+const STEP_COLOR = {1:"var(--s1)", 2:"var(--s2)", 3:"var(--s3)"};
+function goStep(n){
+  wstep = n;
+  document.querySelectorAll(".wstep").forEach(s=>{ s.style.display="none"; s.classList.remove("show"); });
+  const el = document.getElementById("wstep-"+n);
+  el.style.display = "block";
+  requestAnimationFrame(()=> requestAnimationFrame(()=> el.classList.add("show")));   // fade + slide-in
+  const fill = document.getElementById("wprogress-fill");
+  fill.style.width = (n/3*100) + "%";
+  fill.style.background = STEP_COLOR[n];
+  document.getElementById("wbtn-back").style.display = n>1 ? "" : "none";
+  document.getElementById("wbtn-next").textContent = n<3 ? "Next →" : "Calculate my HFRS →";
+  document.getElementById("warn").style.display = "none";
+  window.scrollTo(0,0);
+}
+function validateStep(n){
+  const inp = readInputs();
+  const warn = document.getElementById("warn");
+  if(n===1 && !(inp.income >= 250)){
+    warn.textContent = "Please enter your after-tax annual income to continue.";
+    warn.style.display = ""; return false;
+  }
+  if(n===3 && inp.tenure==="own_mortgage" && inp.mortgage<=0){
+    warn.textContent = "You selected 'own with a mortgage' but entered $0 mortgage — please check.";
+    warn.style.display = ""; return false;
+  }
+  warn.style.display = "none"; return true;
+}
+function nextStep(){
+  if(!validateStep(wstep)) return;
+  if(wstep < 3) goStep(wstep+1);
+  else { updateFromInputs(); showPage(2); }   // final step → results
+}
+function prevStep(){ if(wstep>1) goStep(wstep-1); }
+
+/* money inputs: strip to digits, group with thousands separators; size the hero input */
+function fmtMoney(el){
+  const digits = (el.value||"").replace(/[^\d]/g,"");
+  el.value = digits ? Number(digits).toLocaleString("en-US") : "";
+  if(el.classList.contains("hero-input")) el.style.width = (Math.max(el.value.length,1) + 0.5) + "ch";
+}
+document.querySelectorAll(".js-money").forEach(el=>{
+  fmtMoney(el);
+  el.addEventListener("input", ()=> fmtMoney(el));
 });
-
-function update(){
-  let raw = 0;
-  IND.forEach(ind=>{
-    const disp = derive(ind);                 // sets vals[zkey]
-    const wz = ind.w * vals[ind.zkey]; raw += wz;
-    document.getElementById("val_"+ind.abbr).textContent = disp.raw + "  ·  " + disp.pct;
-    const c = document.getElementById("c_"+ind.abbr);
-    const pts = wz*SCALE;
-    c.textContent = (pts>=0?"+":"") + pts.toFixed(1);
-    c.className = "contrib " + (pts>=0?"pos":"neg");
-  });
-  let s = 100*(raw-RAW_MIN)/(RAW_MAX-RAW_MIN);
-  s = Math.max(0, Math.min(100, s));
-  document.getElementById("rawVal").textContent = raw.toFixed(3);
-  document.getElementById("scoreNum").textContent = s.toFixed(1);
-  document.getElementById("needle").style.left = s + "%";
-
-  const tKey = nearest(TYPES), cKey = nearest(CLUSTERS), clu = CLUSTERS[cKey];
-  document.getElementById("codes").innerHTML = `${tKey}<span class="amp">&amp;</span>${clu.code}`;
-  const parts = [TYPES[tKey].name].concat(clu.name.split("·").map(s=>s.trim()));
-  document.getElementById("codesSub").innerHTML = parts.join("<br>");
-}
-
-function setAll(which){
-  IND.forEach(ind=>{
-    let p;
-    if(which==="mean"){ delete override[ind.abbr]; p = ind.kind==="cont" ? CONT[ind.abbr].pmean : catInit(ind); }
-    else { override[ind.abbr]=PROFILES[which][ind.abbr]; p = override[ind.abbr].pos; }  // real min/max-HFRS household
-    pos[ind.zkey]=p; document.getElementById("s_"+ind.abbr).value=p;
-  });
-  update();
-}
-update();
+goStep(1);
 </script>
 </body>
 </html>
