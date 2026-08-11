@@ -376,7 +376,8 @@
       </div>
       <div class="sec" style="margin-top:24px">Try a change</div>
       <div id="whatifSliders"></div>
-      <div class="note" style="margin-top:20px">Each slider is bounded by your own inputs (paydowns can't exceed what you owe; sheltered increase up to 2× income; income ±50%). The score above updates live and runs through the same PCA pipeline as your baseline.</div>
+      <div class="note" style="margin-top:20px">Each slider is bounded by your own inputs (paydowns can't exceed what you owe; bank balance and sheltered increases go up to 2× income; income ±50%). The score above updates live and runs through the same PCA pipeline as your baseline.</div>
+      <div class="note" style="margin-top:12px">A larger bank balance can help, but on its own it is usually not the strongest driver of financial resilience. If you want to build more resilience over time, try increasing sheltered savings as well. This guidance is based on research from Canada's Financial Wellness Lab. Learn more at <a href="https://financialwellnesslab.ca/" target="_blank" rel="noopener noreferrer">financialwellnesslab.ca</a>.</div>
     </div>
   </div>
 
@@ -676,6 +677,7 @@ const WF = [
   {id:"wf_mortgage",  label:"Mortgage paydown",           bound:i=>i.mortgage,  group:"debt"},
   {id:"wf_otherdebt", label:"Other debt paydown",         bound:i=>i.otherdebt, group:"debt"},
   // block 2 — increase savings (bound at 2× income so $0-sheltered households aren't disabled)
+  {id:"wf_bank",      label:"Bank balance increase",      bound:i=>i.income*2,  group:"save"},
   {id:"wf_sheltered", label:"Sheltered savings increase", bound:i=>i.income*2, group:"save"},
   // block 3 — change income
   {id:"wf_income",    label:"Income change",              bidir:true,           group:"income"},
@@ -716,9 +718,10 @@ function buildWhatif(base){
 function computeWhatif(){
   const base = baseInputs;
   const v = id => { const el=document.getElementById(id); return el ? (parseFloat((el.value||"").replace(/[^0-9.\-]/g,"")) || 0) : 0; };
-  const anyAdj = ["wf_mortgage","wf_sheltered","wf_otherdebt","wf_income"].some(id=>v(id)!==0);
+  const anyAdj = ["wf_mortgage","wf_otherdebt","wf_bank","wf_sheltered","wf_income"].some(id=>v(id)!==0);
   const adj = Object.assign({}, base, {
     mortgage:  Math.max(0, base.mortgage  - v("wf_mortgage")),
+    bank:      base.bank + v("wf_bank"),
     sheltered: base.sheltered + v("wf_sheltered"),
     otherdebt: Math.max(0, base.otherdebt - v("wf_otherdebt")),
     income:    Math.max(1, base.income + v("wf_income")),
