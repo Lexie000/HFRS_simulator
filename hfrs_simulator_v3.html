@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HFRS Score Simulator v4</title>
+<title>HFRS Score Simulator v3</title>
 <style>
   :root{
     --bg:#f5f6f8; --panel:#ffffff; --panel2:#f0f1f4; --line:#e4e6ea;
@@ -72,19 +72,6 @@
   .needle{position:absolute;top:-6px;width:3px;height:26px;background:var(--accent);border-radius:2px;box-shadow:0 0 0 1.5px #fff;transform:translateX(-50%)}
   .scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:6px}
   .pctline{font-size:12px;color:var(--muted);margin:12px 0 4px;line-height:1.45}
-
-  /* population histogram (where you sit in the 2023 distribution) */
-  .hist{margin:16px 0 6px}
-  .hist-bars{position:relative;display:flex;align-items:flex-end;gap:2px;height:82px;padding-top:22px}
-  .hb{flex:1;background:var(--panel2);border-radius:2px 2px 0 0;min-height:2px;transition:background .2s}
-  .hb.user{background:var(--accent)}
-  .hist-you{position:absolute;top:0;bottom:0;width:0;transform:translateX(-50%);z-index:2;pointer-events:none}
-  .hist-you .lab{position:absolute;top:0;left:50%;transform:translateX(-50%);white-space:nowrap;
-    font-size:10.5px;font-weight:700;color:var(--accent);background:var(--panel);padding:0 4px}
-  .hist-you .stem{position:absolute;top:18px;bottom:0;left:50%;transform:translateX(-50%);width:1.5px;
-    background:var(--accent);opacity:.55}
-  .hist-axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:5px}
-  .hist-cap{font-size:11px;color:var(--muted);text-align:center;margin-top:4px;line-height:1.4}
 
   /* contribution bar chart */
   .cbar-row{display:grid;grid-template-columns:64px 1fr 46px;gap:8px;align-items:center;margin:5px 0}
@@ -254,12 +241,12 @@
   .dt-name{color:var(--txt);font-weight:500}
   .dt-ab{color:var(--muted);font-size:11px;margin-left:2px}
   .dt-val{color:var(--txt);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .dt-note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:-3px}
   .pf-note{font-size:11px;color:var(--muted);line-height:1.5;margin:12px 0 4px}
 </style>
 </head>
 <body>
-  <h1 style="text-align:center">HFRS Score Simulator <span style="font-size:13px;color:var(--muted);font-weight:400">v4 · 2023 · PCA weights</span></h1>
+  <h1 style="text-align:center">HFRS Score Simulator <span style="font-size:13px;color:var(--muted);font-weight:400">v3 · 2023 · PCA weights</span></h1>
+  <div class="sub" style="text-align:center">Enter your real finances to get your Household Financial Resilience Score (0–100), then try what-if changes.</div>
 
   <!-- ============ PAGE 1 — MY FINANCES ============ -->
   <div id="page1">
@@ -269,8 +256,8 @@
       <!-- Step 1 — Income & household -->
       <div class="wstep wstep-1 show" id="wstep-1">
         <div class="wstep-head"><span class="wstep-icon">💰</span><span class="wstep-title">Income &amp; household</span><span class="wstep-num">Step 1 of 3</span></div>
-        <div class="herolabel">What's your after tax annual household income?</div>
-        <div class="hero"><span class="hero-cur">$</span><input type="text" inputmode="numeric" min="250" class="hero-input js-money" id="inp_income" value="80,000"></div>
+        <div class="herolabel">What's your after-tax annual household income?</div>
+        <div class="hero"><span class="hero-cur">$</span><input type="text" inputmode="numeric" class="hero-input js-money" id="inp_income" value="80,000"></div>
         <div class="herohelp">After tax, all household members combined.</div>
         <div class="form">
           <div class="field">
@@ -299,14 +286,14 @@
         <div class="form">
           <div class="field"><label>How much do you have in the bank?</label>
             <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_bank" value="10,000"></div>
-            <span class="help">Chequing, savings, term deposits (non registered).</span></div>
+            <span class="help">Chequing, savings, term deposits (non-registered).</span></div>
           <div class="field"><label>How much is in your registered savings (RRSP, TFSA…)?</label>
             <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_sheltered" value="50,000"></div>
             <span class="help">RRSP, TFSA, RRIF, employer pensions.</span></div>
-          <div class="field"><label>How much is in other non registered investments?</label>
+          <div class="field"><label>How much is in other non-registered investments?</label>
             <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_nonsheltered" value="5,000"></div>
             <span class="help">Stocks, bonds, funds outside registered accounts (not bank balance).</span></div>
-          <div class="field"><label>How much are your non financial assets worth?</label>
+          <div class="field"><label>How much are your non-financial assets worth?</label>
             <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_nonfinancial" value="400,000"></div>
             <span class="help">Home equity (value − mortgage), vehicles, business equity, and any other tangible possessions of value.</span></div>
         </div>
@@ -319,7 +306,7 @@
         <div class="form">
           <div class="field"><label>How much do you owe on your mortgage?</label>
             <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_mortgage" value="300,000"></div>
-            <span class="help">Principal + other real estate mortgages. 0 if renting.</span></div>
+            <span class="help">Principal + other real-estate mortgages. 0 if renting.</span></div>
           <div class="field"><label>How much other debt do you have?</label>
             <div class="moneyfield"><span class="pfx">$</span><input type="text" inputmode="numeric" class="money js-money" id="inp_otherdebt" value="5,000"></div>
             <span class="help">Credit cards, LOC, student / vehicle / payday loans.</span></div>
@@ -353,10 +340,10 @@
         <div class="score-num" id="scoreNum">–</div>
         <div class="typename" id="typeName">–</div>
         <div class="tenure" id="tenureLine"></div>
-        <div class="groupline" id="groupLine"></div>
+        <div class="gauge"><div class="needle" id="needle"></div></div>
+        <div class="scale"><span>0</span><span>50</span><span>100</span></div>
         <div class="pctline" id="pctLine"></div>
-        <div class="hist" id="hist"></div>
-        <div class="gauge" style="margin-top:6px"><div class="needle" id="needle"></div></div>
+        <div class="groupline" id="groupLine"></div>
       </div>
       <button class="cta" onclick="showPage(3)">See your breakdown →</button>
     </div>
@@ -372,7 +359,7 @@
       </div>
       <div id="profileBars"></div>
       <div class="pf-note">Points each domain adds to (+, right) or takes from (−, left) the ~49 baseline — they sum to your score.</div>
-      <button class="cta" onclick="showPage(4)">Try a what if change →</button>
+      <button class="cta" onclick="showPage(4)">Try a what-if change →</button>
     </div>
   </div>
 
@@ -390,7 +377,7 @@
       <div class="sec" style="margin-top:24px">Try a change</div>
       <div id="whatifSliders"></div>
       <div class="note" style="margin-top:20px">Each slider is bounded by your own inputs (paydowns can't exceed what you owe; bank balance and sheltered increases go up to 2× income; income ±50%). The score above updates live and runs through the same PCA pipeline as your baseline.</div>
-      <div class="note" style="margin-top:12px">A larger income can help, but on its own it is usually not the strongest driver of financial resilience. If you want to build more resilience over time, try increasing sheltered savings as well. This guidance is based on research from Canada's Financial Wellness Lab. Learn more at <a href="https://financialwellnesslab.ca/" target="_blank" rel="noopener noreferrer">financialwellnesslab.ca</a>.</div>
+      <div class="note" style="margin-top:12px">A larger bank balance can help, but on its own it is usually not the strongest driver of financial resilience. If you want to build more resilience over time, try increasing sheltered savings as well. This guidance is based on research from Canada's Financial Wellness Lab. Learn more at <a href="https://financialwellnesslab.ca/" target="_blank" rel="noopener noreferrer">financialwellnesslab.ca</a>.</div>
     </div>
   </div>
 
@@ -411,16 +398,16 @@ const IND = [
   {zkey:"BBDI_sl_w_z", name:"Cash Buffer", abbr:"BBDI", w:0.073, kind:"cont", unit:"ratio", domain:"savings"},
   // Income
   {zkey:"PATTSTIN_z", name:"Income Outlook", abbr:"PATTSTIN", w:-0.149, kind:"cat", unit:"", domain:"income"},
-  {zkey:"PNBEARG_z", name:"Household Size Burden", abbr:"PNBEARG", w:-0.044, kind:"cat", unit:"", domain:"income"},
+  {zkey:"PNBEARG_z", name:"Income Diversification", abbr:"PNBEARG", w:-0.044, kind:"cat", unit:"", domain:"income"},
 ];
 const DOMAINS = {debt:"Debt burden", savings:"Savings & assets", income:"Income"};
 const CONT = {
-  BBDI:{pmean:70.71, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], rawgrid:[0.0,0.0,0.0,0.0,0.01,0.01,0.01,0.02,0.02,0.03,0.03,0.04,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.13,0.15,0.17,0.19,0.21,0.24,0.27,0.31,0.35,0.41,0.47,0.55,0.64,0.76,0.91,1.11,1.43,1.9,2.77,5.13,546.67]},
-  SHUSH:{pmean:56.05, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.05,0.19,0.34,0.5,0.69,0.89,1.11,1.38,1.66,1.98,2.35,2.75,3.16,3.7,4.3,5.07,5.87,6.86,7.98,9.26,10.67,12.63,14.79,17.48,20.6,24.76,29.76,35.93,44.91,56.63,76.14,103.23,149.78,249.61,561.13,290000.0]},
-  MDI:{pmean:65.45, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.25,0.51,0.74,0.97,1.18,1.41,1.62,1.84,2.13,2.45,2.79,3.28,3.9,4.99,7.45,7000.0]},
-  FINAS:{pmean:61.88, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], rawgrid:[-31.87,0.0,0.01,0.02,0.04,0.07,0.1,0.13,0.17,0.2,0.24,0.28,0.33,0.38,0.43,0.49,0.54,0.61,0.67,0.73,0.8,0.89,0.98,1.07,1.17,1.28,1.4,1.52,1.67,1.83,2.03,2.27,2.54,2.85,3.27,3.81,4.75,6.54,10.87,25.07,1850.4]},
-  ODDI:{pmean:69.14, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.02,0.04,0.05,0.07,0.1,0.12,0.15,0.18,0.21,0.25,0.3,0.35,0.4,0.46,0.54,0.63,0.76,0.95,1.29,2.05,800.0]},
-  PWNETWPT:{pmean:30.06, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], rawgrid:[-2388200.0,829.38,9808.75,23854.87,44435.0,75946.88,113012.5,154810.12,198388.0,247539.38,295268.75,347279.0,399062.0,455263.75,514472.5,576618.75,635000.0,702000.0,771458.75,849400.0,924125.0,1003006.25,1086243.0,1167012.12,1255108.0,1359812.5,1453536.25,1572293.75,1703950.0,1837037.5,1972500.0,2136505.0,2331800.0,2549443.75,2809241.25,3088550.0,3473670.0,4066332.25,4954600.0,6635693.75,37779750.0]},
+  BBDI:{pmean:70.71, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-0.6327,-0.6327,-0.6323,-0.627,-0.6196,-0.6117,-0.6028,-0.5927,-0.582,-0.5695,-0.5569,-0.5437,-0.5308,-0.5132,-0.4963,-0.477,-0.4557,-0.4301,-0.4048,-0.3773,-0.3445,-0.3108,-0.2718,-0.2265,-0.1798,-0.1249,-0.0694,0.0061,0.077,0.1742,0.2796,0.3958,0.5296,0.6974,0.8956,1.1286,1.463,1.8808,2.4997,3.6485,4.8281], rawgrid:[0.0,0.0,0.0,0.0,0.01,0.01,0.01,0.02,0.02,0.03,0.03,0.04,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.13,0.15,0.17,0.19,0.21,0.24,0.27,0.31,0.35,0.41,0.47,0.55,0.64,0.76,0.91,1.11,1.43,1.9,2.77,5.13,546.67]},
+  SHUSH:{pmean:56.05, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-1.0951,-1.0951,-1.0951,-1.0951,-1.0951,-1.0648,-0.995,-0.9267,-0.8611,-0.7945,-0.7284,-0.6646,-0.5955,-0.5306,-0.4653,-0.3982,-0.3332,-0.2744,-0.2043,-0.1347,-0.0568,0.0151,0.092,0.1691,0.2459,0.3199,0.4094,0.494,0.5847,0.6745,0.776,0.8782,0.9834,1.1087,1.2397,1.4076,1.581,1.7936,2.0862,2.5514,2.9926], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.05,0.19,0.34,0.5,0.69,0.89,1.11,1.38,1.66,1.98,2.35,2.75,3.16,3.7,4.3,5.07,5.87,6.86,7.98,9.26,10.67,12.63,14.79,17.48,20.6,24.76,29.76,35.93,44.91,56.63,76.14,103.23,149.78,249.61,561.13,290000.0]},
+  MDI:{pmean:65.45, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.6736,-0.3565,-0.0802,0.1223,0.3009,0.4509,0.5895,0.7107,0.8291,0.9691,1.1106,1.2453,1.4185,1.6146,1.9021,2.3985,3.2976], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.25,0.51,0.74,0.97,1.18,1.41,1.62,1.84,2.13,2.45,2.79,3.28,3.9,4.99,7.45,7000.0]},
+  FINAS:{pmean:61.88, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-0.8359,-0.8349,-0.8261,-0.8111,-0.7903,-0.7666,-0.7388,-0.7083,-0.6751,-0.6442,-0.6067,-0.5724,-0.5337,-0.4972,-0.4604,-0.4194,-0.3791,-0.3384,-0.2987,-0.2574,-0.2152,-0.1689,-0.119,-0.0713,-0.0225,0.0283,0.0836,0.1372,0.1962,0.258,0.3295,0.4096,0.4944,0.5819,0.6897,0.8164,1.0035,1.2885,1.7651,2.5922,4.2249], rawgrid:[-31.87,0.0,0.01,0.02,0.04,0.07,0.1,0.13,0.17,0.2,0.24,0.28,0.33,0.38,0.43,0.49,0.54,0.61,0.67,0.73,0.8,0.89,0.98,1.07,1.17,1.28,1.4,1.52,1.67,1.83,2.03,2.27,2.54,2.85,3.27,3.81,4.75,6.54,10.87,25.07,1850.4]},
+  ODDI:{pmean:69.14, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.6255,-0.5904,-0.5577,-0.5154,-0.4646,-0.4045,-0.3411,-0.2679,-0.1916,-0.1137,-0.0225,0.0724,0.1825,0.2976,0.418,0.552,0.7051,0.8911,1.1255,1.4469,1.9522,2.8399,4.6696], rawgrid:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.02,0.04,0.05,0.07,0.1,0.12,0.15,0.18,0.21,0.25,0.3,0.35,0.4,0.46,0.54,0.63,0.76,0.95,1.29,2.05,800.0]},
+  PWNETWPT:{pmean:30.06, pgrid:[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,85.0,87.5,90.0,92.5,95.0,97.5,100.0], zgrid:[-4.9318,-1.1194,-0.5911,-0.4009,-0.2678,-0.1532,-0.0681,-0.0008,0.0523,0.0996,0.1374,0.1721,0.2018,0.23,0.2562,0.2806,0.3012,0.3227,0.3429,0.3635,0.3815,0.399,0.4161,0.4314,0.447,0.4641,0.4784,0.4952,0.5124,0.5285,0.5437,0.5608,0.5795,0.5986,0.6194,0.6397,0.6648,0.6985,0.7408,0.7783,0.7783], rawgrid:[-2388200.0,829.38,9808.75,23854.87,44435.0,75946.88,113012.5,154810.12,198388.0,247539.38,295268.75,347279.0,399062.0,455263.75,514472.5,576618.75,635000.0,702000.0,771458.75,849400.0,924125.0,1003006.25,1086243.0,1167012.12,1255108.0,1359812.5,1453536.25,1572293.75,1703950.0,1837037.5,1972500.0,2136505.0,2331800.0,2549443.75,2809241.25,3088550.0,3473670.0,4066332.25,4954600.0,6635693.75,37779750.0]},
 };
 const CAT = {
   PATTSTIN:{cats:[-1,0,1], zmap:{"-1":-1.7901,"0":-0.2707,"1":1.2487}, share:{"-1":16.7,"0":56.4,"1":26.9}, zmean:-0.1164},
@@ -428,18 +415,18 @@ const CAT = {
 };
 const CENT_KEYS = ["BBDI_sl_w_z","SHUSH_sl_w_z","MDI_sl_w_z","FINAS_sl_w_z","ODDI_sl_w_z","PWNETWPT_sl_w_z","PATTSTIN_z","PNBEARG_z"];
 const CLUSTERS = {
-  0:{code:"C1", name:"Low wealth · Do not own",           c:[-0.2292,-0.4902,-0.5043,0.0616,0.0408,-0.7409,0.072,-0.3602]},
-  1:{code:"C2", name:"Mid wealth · Own with mortgage",    c:[-0.1758,0.3612,0.9637,-0.1702,0.1292,0.3827,0.006,0.53]},
-  2:{code:"C3", name:"High wealth · Own without mortgage",c:[0.4997,0.1647,-0.669,0.1683,-0.2342,0.4568,-0.2879,-0.2387]},
+  0:{code:"C1", name:"Low-wealth · Do not own",           c:[-0.2292,-0.4902,-0.5043,0.0616,0.0408,-0.7409,0.072,-0.3602]},
+  1:{code:"C2", name:"Mid-wealth · Own with mortgage",    c:[-0.1758,0.3612,0.9637,-0.1702,0.1292,0.3827,0.006,0.53]},
+  2:{code:"C3", name:"High-wealth · Own without mortgage",c:[0.4997,0.1647,-0.669,0.1683,-0.2342,0.4568,-0.2879,-0.2387]},
 };
 const TYPES = {
-  D:{name:"Debt driven",                    c:[-0.2864,0.0156,0.6588,-0.2344,0.2425,-0.5299,0.9846,0.3453]},
-  DS:{name:"Debt driven + Saver",           c:[-0.1162,0.4496,1.3405,-0.2573,-0.404,0.3631,-0.2707,-1.3305]},
-  E:{name:"Multi earner",                   c:[-0.2754,0.2739,0.2172,-0.1436,-0.038,0.4429,0.3128,1.8082]},
-  F:{name:"Financial asset & liquidity led",c:[0.2322,-0.0549,-0.6521,0.2275,-0.3733,0.1842,0.2603,-1.063]},
+  D:{name:"Debt-driven",                    c:[-0.2864,0.0156,0.6588,-0.2344,0.2425,-0.5299,0.9846,0.3453]},
+  DS:{name:"Debt-driven + Saver",           c:[-0.1162,0.4496,1.3405,-0.2573,-0.404,0.3631,-0.2707,-1.3305]},
+  E:{name:"Multi-earner",                   c:[-0.2754,0.2739,0.2172,-0.1436,-0.038,0.4429,0.3128,1.8082]},
+  F:{name:"Financial-asset & liquidity-led",c:[0.2322,-0.0549,-0.6521,0.2275,-0.3733,0.1842,0.2603,-1.063]},
   B:{name:"Balanced",                       c:[0.0801,0.189,0.0735,-0.0125,0.1261,0.33,-0.3273,0.0335]},
-  T:{name:"Thin wealth",                    c:[-0.1859,-0.1632,-0.6359,-0.0875,-0.1266,0.2048,1.0491,0.7182]},
-  W:{name:"Wealth anchored",                c:[-0.0215,0.2875,0.0266,-0.0013,-0.1153,0.4015,-1.4925,0.3655]},
+  T:{name:"Thin-wealth",                    c:[-0.1859,-0.1632,-0.6359,-0.0875,-0.1266,0.2048,1.0491,0.7182]},
+  W:{name:"Wealth-anchored",                c:[-0.0215,0.2875,0.0266,-0.0013,-0.1153,0.4015,-1.4925,0.3655]},
 };
 
 /* ============================================================
@@ -487,7 +474,7 @@ const BANNERLAB = {FINAS:"Asset liquidity", MDI:"MDI", SHUSH:"Reg. savings", PWN
 const DIVFORM = {
   FINAS:"Financial / Non-financial assets", MDI:"Mortgage / Income", SHUSH:"Sheltered / (Bank + non-shelt.)",
   PWNETWPT:"Total assets − Total debts", BBDI:"Bank balance / Income", ODDI:"Other debt / Income",
-  PATTSTIN:"Income outlook (category)", PNBEARG:"Household size (category)",
+  PATTSTIN:"Income outlook (category)", PNBEARG:"Number of earners (category)",
 };
 
 function deriveRatios(inp){
@@ -506,27 +493,7 @@ function deriveRatios(inp){
   const pwnetwpt = netWorth;
   return {BBDI:bbdi, SHUSH:shush, MDI:mdi, FINAS:finas, ODDI:oddi, PWNETWPT:pwnetwpt};
 }
-// Scoring transform (smooth): winsorize raw ratio → signed-log → standardize.
-// Params are weighted (PWEIGHT) mean/std of the winsorized signed-log ratio on the
-// 2023 sample, plus the raw winsor cutoffs — derived once offline from data/adf.csv.
-// Reproduces the original _sl_w_z z-scores to ~1e-14 and the intended HFRS to <0.2 pts,
-// while removing the 41-point grid's tail interpolation error (up to ~16 pts on real data).
-const PARAMS = {
-  BBDI:     {mean:0.268072,  std:0.423713,  winsorLow:0.0,       winsorHigh:9.112606},
-  SHUSH:    {mean:1.901471,  std:1.736398,  winsorLow:0.0,       winsorHigh:1208.333333},
-  MDI:      {mean:0.468021,  std:0.694836,  winsorLow:0.0,       winsorHigh:14.788732},
-  FINAS:    {mean:0.795130,  std:0.951217,  winsorLow:0.0,       winsorHigh:122.210526},
-  ODDI:     {mean:0.201474,  std:0.322101,  winsorLow:0.0,       winsorHigh:4.504505},
-  PWNETWPT: {mean:11.953617, std:4.673690,  winsorLow:-65925.0,  winsorHigh:5905000.0},
-};
-function rawToZ(abbr, v){
-  const p = PARAMS[abbr];
-  const clipped = Math.max(p.winsorLow, Math.min(v, p.winsorHigh));
-  const t = Math.sign(clipped) * Math.log(1 + Math.abs(clipped));
-  return (t - p.mean) / p.std;
-}
-// Percentile display only (the "higher than X%" line + domain-position bars) — keeps the
-// coarse empirical raw→percentile lookup; not used for scoring.
+function rawToZ(abbr, v){ const c=CONT[abbr]; return lerp(c.rawgrid, c.zgrid, v); }
 function rawToPct(abbr, v){ const c=CONT[abbr]; return lerp(c.rawgrid, c.pgrid, v); }
 
 function computeHFRS(inp){
@@ -558,20 +525,6 @@ function computeHFRS(inp){
   return {hfrs, raw, zv, indicators, tKey:nearestZ(TYPES,zv), cKey:nearestZ(CLUSTERS,zv)};
 }
 
-// weighted (PWEIGHT) share of 2023 households in each 5-point HFRS bin (0–5,5–10,…,95–100)
-const HFRS_DIST = [0.01,0.09,0.04,0.19,1.49,3.92,7.11,11.35,15.26,14.82,14.58,12.34,8.43,4.62,2.43,1.65,0.72,0.60,0.26,0.08];
-function renderHist(score){
-  const maxS = Math.max(...HFRS_DIST);
-  const userBin = Math.min(Math.floor(score/5), 19);
-  const bars = HFRS_DIST.map((s,i)=>
-    `<div class="hb${i===userBin?' user':''}" style="height:${Math.max(3, s/maxS*100)}%"></div>`).join("");
-  document.getElementById("hist").innerHTML =
-    `<div class="hist-bars">${bars}`+
-      `<div class="hist-you" style="left:${Math.max(0,Math.min(100,score))}%"><span class="lab">You · ${score.toFixed(1)}</span><span class="stem"></span></div>`+
-    `</div>`+
-    `<div class="hist-axis"><span>0</span><span>50</span><span>100</span></div>`+
-    `<div class="hist-cap">Distribution of HFRS across 2023 Canadian households</div>`;
-}
 const HFRS_PCT = [0,1,2,5,9,15,24,35,47,59,69,78,85,90,93,96,97,98,99,99.5,100];
 function hfrsToPct(score){
   const i = Math.min(Math.floor(score/5), 19);
@@ -618,8 +571,7 @@ function profileTags(res){
 const PF_COL = {debt:"#8b5cf6", savings:"#3b82f6", income:"#f59e0b"};
 const RATIO_NAME = {MDI:"Mortgage Burden", ODDI:"Other Debt Burden", FINAS:"Asset Liquidity",
   SHUSH:"Registered Savings", PWNETWPT:"Net Worth", BBDI:"Cash Buffer",
-  PATTSTIN:"Income Outlook", PNBEARG:"Household Size Burden"};
-const RATIO_NOTE = {PATTSTIN:"This reflects spending behavior more than income itself, people who expect rising income tend to save less today."};
+  PATTSTIN:"Income Outlook", PNBEARG:"Income Diversification"};
 const fmtPts = c => `${c>=0?"+":""}${c.toFixed(1)}`;
 function renderProfile(res){
   const dom = {debt:0, savings:0, income:0};
@@ -637,9 +589,8 @@ function renderProfile(res){
                      : `right:50%;width:${w}%;background:${col}`;
     const members = IND.filter(i=>i.domain===m.key).map(i=>{
       const c = res.indicators[i.abbr].contrib;
-      const note = RATIO_NOTE[i.abbr] ? `<div class="dt-note">${RATIO_NOTE[i.abbr]}</div>` : "";
       return `<div class="dt-row"><span class="dt-name">${RATIO_NAME[i.abbr]} <span class="dt-ab">${i.abbr}</span></span>`+
-        `<span class="dt-val">${fmtPts(c)}</span></div>`+note;
+        `<span class="dt-val">${fmtPts(c)}</span></div>`;
     }).join("");
     return `<div class="pf-item"><div class="pf-row" onclick="this.parentElement.classList.toggle('open')">`+
       `<span class="pf-lab"><span class="pf-dot" style="background:${col}"></span>${m.label}<span class="pf-caret">›</span></span>`+
@@ -651,8 +602,8 @@ function renderProfile(res){
 function validateInputs(){
   const inp = readInputs();
   const warn = document.getElementById("warn");
-  if(!(inp.income >= 250)){
-    warn.textContent = "Please enter your after tax annual income to continue — based on the SFS survey, please enter a valid income above $250.";
+  if(!(inp.income > 0)){
+    warn.textContent = "Please enter an income greater than 0 to compute your score.";
     warn.style.display = ""; return false;
   }
   if(inp.tenure === "own_mortgage" && inp.mortgage <= 0){
@@ -682,7 +633,6 @@ function renderScore(res, inp){
     `Higher than <b>~${Math.round(p)}%</b> of 2023 Canadian households.`;
   document.getElementById("groupLine").innerHTML =
     profileTags(res).map(x=>`<span class="ptag ${x.tone}">${x.l}</span>`).join("");
-  renderHist(res.hfrs);
   renderProfile(res);
 }
 // percentile-slider positions: grey dot = current, white dot = what-if, glow = shift; + ↑/↓ HFRS tag
@@ -729,10 +679,10 @@ const WF = [
   // block 2 — increase savings (bound at 2× income so $0-sheltered households aren't disabled)
   {id:"wf_bank",      label:"Bank balance increase",      bound:i=>i.income*2,  group:"save"},
   {id:"wf_sheltered", label:"Sheltered savings increase", bound:i=>i.income*2, group:"save"},
-  // block 3 — increase income (positive-only, up to +50%: avoids the counter-intuitive "income down → score up")
-  {id:"wf_income",    label:"Income increase",            bound:i=>i.income*0.5, group:"income"},
+  // block 3 — change income
+  {id:"wf_income",    label:"Income change",              bidir:true,           group:"income"},
 ];
-const WF_GROUPS = {debt:"Pay down debt", save:"Increase savings", income:"Increase income"};
+const WF_GROUPS = {debt:"Pay down debt", save:"Increase savings", income:"Change income"};
 function niceStep(range){ return Math.max(500, Math.round(range/200/500)*500) || 500; }
 function buildWhatif(base){
   const box = document.getElementById("whatifSliders");
@@ -810,7 +760,6 @@ function updateFromInputs(){
 }
 /* ---------- 3-step wizard ---------- */
 let wstep = 1;
-let nonfinAck = false;   // one-time acknowledgement for $0 non financial assets
 const STEP_COLOR = {1:"var(--s1)", 2:"var(--s2)", 3:"var(--s3)"};
 function goStep(n){
   wstep = n;
@@ -830,12 +779,12 @@ function validateStep(n){
   const inp = readInputs();
   const warn = document.getElementById("warn");
   if(n===1 && !(inp.income >= 250)){
-    warn.textContent = "Please enter your after tax annual income to continue — based on the SFS survey, please enter a valid income above $250.";
+    warn.textContent = "Please enter your after-tax annual income to continue.";
     warn.style.display = ""; return false;
   }
-  if(n===2 && !(inp.nonfinancial > 0) && !nonfinAck){
-    warn.textContent = "You entered $0 in non financial assets. Any non financial asset counts — home equity, vehicles, business equity, and other valuables. If it's truly $0, tap Next again to continue.";
-    warn.style.display = ""; nonfinAck = true; return false;
+  if(n===2 && !(inp.nonfinancial > 0)){
+    warn.textContent = "Please enter a non-financial asset value greater than $0. Most households have at least some non-financial assets, so review this field carefully before continuing.";
+    warn.style.display = ""; return false;
   }
   if(n===3 && inp.tenure==="own_mortgage" && inp.mortgage<=0){
     warn.textContent = "You selected 'own with a mortgage' but entered $0 mortgage — please check.";
@@ -860,8 +809,6 @@ document.querySelectorAll(".js-money").forEach(el=>{
   fmtMoney(el);
   el.addEventListener("input", ()=> fmtMoney(el));
 });
-// re-arm the $0 non financial reminder whenever that field is edited
-document.getElementById("inp_nonfinancial").addEventListener("input", ()=>{ nonfinAck = false; });
 goStep(1);
 </script>
 </body>
